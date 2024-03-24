@@ -5,8 +5,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-# sys.path.append('/Users/omm793/iCloud/code/packages/ipss')
-from src.ipss import ipss
+from ipss.ipss import ipss
 
 
 #--------------------------------
