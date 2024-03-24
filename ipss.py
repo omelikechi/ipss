@@ -52,7 +52,7 @@ def ipss(X, y,
 
 	if standardize_X:
 		X = StandardScaler().fit_transform(X)
-		
+
 	n, p = X.shape
 	n_split = int(n/2)
 
@@ -61,7 +61,10 @@ def ipss(X, y,
 
 	# maximum number of features
 	if q_max is None:
-		q_max = p**(9/10)
+		if p < 200:
+			q_max = 3 * p / 4
+		else:
+			q_max = p / 2
 
 	# compute alphas
 	alphas = compute_alphas(X, y, n_alphas, q_max, binary_response)
