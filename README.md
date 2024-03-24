@@ -8,11 +8,9 @@ arxiv:
 
 ## Installation
 ### Dependencies
-- NumPy
-- SciPy
-- scikit-learn
-- joblib
-
+```
+pip install joblib numpy scikit-learn scipy
+```
 ### Installing IPSS
 To install from PyPI:
 ```
@@ -41,28 +39,28 @@ print(result['selected_features'])  # features selected by IPSS
 `result` is a dictionary containing:
 - `alphas`: Grid of regularization parameters (array of shape `(n_alphas,)`).
 - `average_select`: Average number of features selected at each regularization (array of shape `(n_alphas,)`).
-- `scores`: IPSS scores for each feature (array of shape `(p,)`).
-- `selected_features`: Indices of the features selected by IPSS (list of ints).
+- `scores`: IPSS score for each feature (array of shape `(p,)`).
+- `selected_features`: Indices of features selected by IPSS (list of ints).
 - `stability_paths`: Estimated selection probabilities at each regularization (array of shape `(n_alphas, p)`)
-- `stop_index`: Index of the regularization value at which the IPSS threshold is passed (int).
+- `stop_index`: Index of regularization value at which IPSS threshold is passed (int).
 - `threshold`: The calculated threshold value tau = Integral value / EFP (scalar).
 
 ### Full ist of arguments
-`ipss` takes the following arguments (though it only requires `X` and `y`, and typically only `EFP` is altered):
-- `X`: Feature matrix (array of shape `(n,p)`).
-- `y`: Vector of responses (array of shape `(n,)` or `(n, 1)`). IPSS automatically detects whether y is continuous (in which case it runs lasso or LARS) or binary (in which case it runs L1-regularized logistic regression).
+`ipss` takes the following arguments (only `X` and `y` are required, and typically only `EFP` is specified):
+- `X`: Features (array of shape `(n,p)`).
+- `y`: Responses (array of shape `(n,)` or `(n, 1)`). IPSS automatically detects if `y` is continuous or binary.
 - `EFP`: Target expected number of false positives (positive scalar; default is `1`).
 - `cutoff`: Together with `EFP`, determines IPSS threshold (positive scalar; default is `0.05`).
 - `B`: Number of subsampling steps (int; default is `50`).
 - `n_alphas`: Number of values in regularization grid (int; default is `50`).
-- `q_max`: Max number of features selected (int; default is `None`). If `None`, defaults to `3p/4` if p < 200 and `p/2` otherwise.
-- `Z_sparse`: If `True`, output tensor of subsamples, `Z`, is sparse (default is `False`). Can help save space.
+- `q_max`: Max number of features selected (int; default is `None`, in which case `q_max = p/2`).
+- `Z_sparse`: If `True`, tensor of subsamples, `Z`, is sparse (default is `False`).
 - `lars`: Implements least angle regression (LARS) for linear regression if `True`, lasso otherwise (default is `False`).
 - `selection_function`: Function to apply to the stability paths. If a positive int, `m`, function is `h_m(x) = (2x - 1)**m` if `x >= 0.5` and `0` if `x < 0.5` (int, callable, or `None`; default is `None`, in which case function is `h_2` if y is binary, or `h_3` if continuous).
-- `with_stability`: If `True`, uses a stability measure in the selection process (default is `False`).
+- `with_stability`: If `True`, uses a stability measure in selection process (default is `False`).
 - `delta`: Determines scaling of regularization interval (scalar; default is `1`).
-- `standardize_X`: If `True`, standardizes each feature in `X` (default is `True`).
-- `center_y`: If `True`, centers `y` if it is continuous (default is `True`).
+- `standardize_X`: If `True`, standardizes all features (default is `True`).
+- `center_y`: If `True`, centers `y` when it is continuous (default is `True`).
 
 
 
