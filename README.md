@@ -24,6 +24,10 @@ To clone from GitHub:
 ```
 git clone git@github.com:omelikechi/ipss.git
 ```
+Or clone from GitHub using HTTPS:
+```
+git clone https://github.com/omelikechi/ipss.git
+```
 
 ## Usage
 Given an n-by-p matrix of features, X (n = number of samples, p = number of features), an n-by-1 vector of responses, y, and a target number of expected false positives, EFP: 
