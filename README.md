@@ -11,11 +11,6 @@ and practitioners alike, requiring only the X and y data and specification of E(
 arXiv:
 
 ## Installation
-### Dependencies
-```
-pip install joblib numpy scikit-learn scipy
-```
-### Installing IPSS
 To install from PyPI:
 ```
 pip install ipss
@@ -27,6 +22,15 @@ git clone git@github.com:omelikechi/ipss.git
 Or clone from GitHub using HTTPS:
 ```
 git clone https://github.com/omelikechi/ipss.git
+```
+### Dependencies
+For `ipss`:
+```
+pip install joblib numpy scikit-learn scipy
+```
+Additional dependencies to run examples:
+```
+pip install matplotlib seaborn
 ```
 
 ## Usage
