@@ -7,31 +7,34 @@ Python implementation of integrated path stability selection (IPSS)
 arxiv:
 
 ## Installation
-Install from PyPI:
+IPSS has the following dependencies:
+- NumPy
+- SciPy
+- scikit-learn
+- joblib
+Once these are installed, ipss can be installed from PyPI:
 ```
 pip install ipss
 ```
-Clone from GitHub:
+or cloned from GitHub:
 ```
 git clone git@github.com:omelikechi/ipss.git
 ```
 
 ## Usage
+Given an n-by-p matrix of features X (n = number of samples, p = number of features), an n-by-1 vector of responses y, and a target number of expected false positives: 
+```python
+from ipss import ipss
+result = ipss(X, y, EFP)
+```
+X and y are numpy arrays, and EFP is a positive scalar. Typically the features X are standardized, though this is left to the user to do beforehand. IPSS automatically detects whether y
+is continuous (in which case lasso or LARS are used) or binary (in which case L1-regularized logistic regression is used).
 
-## Features
+```result``` is a dictionary with the following keys:
 
-- **Flexible Regression Choices**: Supports least angle regression (LARS), Lasso regression, and logistic regression for binary outcomes.
-- **Subsampling and Parallelization**: Implements subsampling to estimate feature stability across subsamples, with parallel processing for efficiency.
-- **Custom Selection Functions**: Allows for the application of custom selection functions to estimated selection probabilities.
-- **Stability Measure Incorporation**: Option to use a stability measure for feature selection, enhancing the robustness of selected features.
-- **Sparse Matrix Support**: Outputs subsample tensor as a sparse matrix to handle high-dimensional data efficiently.
 
-## Installation
 
-To use IPSS, you will need Python installed on your system, along with the following dependencies:
-- NumPy
-- SciPy
-- scikit-learn
-- joblib
 
-You can install these packages using `pip`
+
+
+
