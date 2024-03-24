@@ -28,8 +28,8 @@ Given an n-by-p matrix of features X (n = number of samples, p = number of featu
 ```python
 from ipss import ipss
 
-# Load data into X and y
-# Define expected number of false positives (EFP)
+# Load data X and y
+# Specify expected number of false positives (EFP)
 # Run IPSS:
 result = ipss(X, y, EFP)
 
