@@ -3,13 +3,10 @@
 Data freely available here: https://www.linkedomics.org/data_download/TCGA-PRAD/ 
 '''
 
-import sys
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.append('/Users/omm793/iCloud/code/packages/ipss')
-from src.ipss import ipss
+from ipss import ipss
 
 
 #--------------------------------

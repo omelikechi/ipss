@@ -1,11 +1,9 @@
 # A simple example
 
-import sys
-
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ipss.ipss import ipss
+from ipss import ipss
 
 
 #--------------------------------

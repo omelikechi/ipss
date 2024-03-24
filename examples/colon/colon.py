@@ -3,14 +3,11 @@
 Data freely available here: http://genomics-pubs.princeton.edu/oncology/affydata/index.html
 '''
 
-import sys
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-sys.path.append('/Users/omm793/iCloud/code/packages/ipss')
-from src.ipss import ipss
+from ipss import ipss
 
 
 #--------------------------------
@@ -98,8 +95,6 @@ X = X[:,selected_features]
 
 n_normal = np.sum(y)
 n_cancerous = n - n_normal
-print(n_normal)
-print(n_cancerous)
 
 avg_expression_cancerous = []
 for i in range(len(selected_features)):
