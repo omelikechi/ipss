@@ -1,10 +1,10 @@
 # Integrated path stability selection (IPSS)
 
 Integrated path stability selection (IPSS) is a general method for improving feature selection algorithms that yields
-more robust, accurate, and interpretable models. IPSS achieves this by allowing users to control the expected number of 
+more robust, accurate, and interpretable models. IPSS does this by allowing users to control the expected number of 
 falsely selected features, E(FP), while producing far more true positives than other versions of stability selection. 
 This Python implementation of IPSS applied to L1-regularized linear and logistic regression is intended for researchers 
-and practitioners alike, requiring only the X and y data and specification of E(FP).
+and practitioners alike, and requires only the X and y data and specification of E(FP).
 
 ## Associated paper
 
