@@ -43,7 +43,7 @@ print(result['selected_features'])  # features selected by IPSS
 - `average_select`: Average number of variables selected at each regularization value (numpy array of size `(n_alphas,)`).
 - `scores`: IPSS scores for each feature (numpy array of size `(p,)`).
 - `selected_features`: Indices of the features selected by IPSS (list of ints).
-- `stability_paths`: Estimated selection probabilities for each feature across different regularization values (numpy array of size `(n_alphas, p)`)
+- `stability_paths`: Estimated selection probabilities for each feature at each regularization value (numpy array of size `(n_alphas, p)`)
 - `stop_index`: Index of the regularization value at which the IPSS threshold is passed (integer).
 - `threshold`: The calculated threshold value tau = Integral value / EFP (float).
 
