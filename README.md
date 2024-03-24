@@ -1,7 +1,10 @@
 # Integrated path stability selection (IPSS)
 
-Integrated path stability selection (IPSS) is a general method for improving feature selection algorithms. This package
-is a Python implementation of IPSS applied to L1-regularized linear and logistic regression.
+Integrated path stability selection (IPSS) is a general method for improving feature selection algorithms that yields
+more robust, accurate, and interpretable models. IPSS achieves this by allowing users to control the expected number of 
+falsely selected features, E(FP), while producing far more true positives than other versions of stability selection. 
+This Python implementation of IPSS applied to L1-regularized linear and logistic regression is intended for researchers 
+and practitioners alike, and requires only the input data and specification of E(FP).
 
 ## Associated paper
 
@@ -62,6 +65,12 @@ print(result['selected_features'])  # features selected by IPSS
 - `delta`: Determines scaling of regularization interval (scalar; default is `1`).
 - `standardize_X`: If `True`, standardizes all features (default is `True`).
 - `center_y`: If `True`, centers `y` when it is continuous (default is `True`).
+
+## Examples
+Examples are available in the `examples` folder. These include
+- A simple example in which features are simulated independently from a standard normal distribution.
+- An example using prostate cancer data, as detailed in the associated paper.
+- An example using colon cancer data, as detailed in the associated paper.
 
 
 
