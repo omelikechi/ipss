@@ -6,6 +6,7 @@ from joblib import Parallel, delayed
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.linear_model import lars_path, Lasso, lasso_path, LogisticRegression
+from sklearn.preprocessing import StandardScaler
 
 
 #--------------------------------
@@ -38,7 +39,9 @@ def ipss(X, y,
 	lars=False,
 	selection_function=None,
 	with_stability=False,
-	delta=1
+	delta=1,
+	standardize_X=True,
+	center_y=True
 	):
 
 	if len(y.shape) != 1:
@@ -47,6 +50,9 @@ def ipss(X, y,
 		else:
 			raise ValueError("Error: Response y must be a numpy array with shape (n,) or (n,1)")
 
+	if standardize_X:
+		X = StandardScaler().fit_transform(X)
+		
 	n, p = X.shape
 	n_split = int(n/2)
 
@@ -62,6 +68,10 @@ def ipss(X, y,
 
 	# linear regression
 	if not binary_response:
+
+		if center_y:
+			y -= np.mean(y)
+
 		if lars:
 			def process_b(b):
 				indices = np.arange(n)
