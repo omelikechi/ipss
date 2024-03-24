@@ -52,7 +52,7 @@ print(result['selected_features'])  # features selected by IPSS
 - `EFP`: Target expected number of false positives (positive scalar; default is `1`).
 - `cutoff`: Together with `EFP`, determines IPSS threshold (positive scalar; default is `0.05`).
 - `B`: Number of subsampling steps (int; default is `50`).
-- `n_alphas`: Number of values in regularization grid (int; default is `50`).
+- `n_alphas`: Number of values in regularization grid (int; default is `25`).
 - `q_max`: Max number of features selected (int; default is `None`, in which case `q_max = p/2`).
 - `Z_sparse`: If `True`, tensor of subsamples, `Z`, is sparse (default is `False`).
 - `lars`: Implements least angle regression (LARS) for linear regression if `True`, lasso otherwise (default is `False`).
