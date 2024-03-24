@@ -40,10 +40,10 @@ print(result['selected_features'])  # features selected by IPSS
 ### Results
 `result` is a dictionary containing:
 - `alphas`: Grid of regularization parameters (array of shape `(n_alphas,)`).
-- `average_select`: Average number of variables selected at each regularization value (array of shape `(n_alphas,)`).
+- `average_select`: Average number of features selected at each regularization (array of shape `(n_alphas,)`).
 - `scores`: IPSS scores for each feature (array of shape `(p,)`).
 - `selected_features`: Indices of the features selected by IPSS (list of ints).
-- `stability_paths`: Estimated selection probabilities at each regularization value (array of shape `(n_alphas, p)`)
+- `stability_paths`: Estimated selection probabilities at each regularization (array of shape `(n_alphas, p)`)
 - `stop_index`: Index of the regularization value at which the IPSS threshold is passed (int).
 - `threshold`: The calculated threshold value tau = Integral value / EFP (scalar).
 
