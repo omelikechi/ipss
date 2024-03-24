@@ -67,7 +67,7 @@ print(result['selected_features'])  # features selected by IPSS
 - `n_alphas`: Number of values in regularization grid (int; default is `25`).
 - `q_max`: Max number of features selected (int; default is `None`, in which case `q_max = p/2`).
 - `Z_sparse`: If `True`, tensor of subsamples, `Z`, is sparse (default is `False`).
-- `lars`: Implements least angle regression (LARS) for linear regression if `True`, lasso otherwise (default is `False`).
+- `lars`: Implements least angle regression for linear regression if `True`, lasso otherwise (default is `False`).
 - `selection_function`: Function to apply to the stability paths. If a positive int, `m`, function is `h_m(x) = (2x - 1)**m` if `x >= 0.5` and `0` if `x < 0.5` (int, callable, or `None`; default is `None`, in which case function is `h_2` if y is binary, or `h_3` if continuous).
 - `with_stability`: If `True`, uses a stability measure in selection process (default is `False`).
 - `delta`: Determines scaling of regularization interval (scalar; default is `1`).
