@@ -55,10 +55,10 @@ print(result['selected_features'])  # features selected by IPSS
 - `cutoff`: Positive scalar that, together with `EFP`, determines the IPSS threshold (default is `0.05`).
 - `B`: Number of subsampling steps (int; default is `50`).
 - `n_alphas`: Number of values in regularization grid (int; default is `50`).
-- `q_max`: Max number of features to be selected (int; default is `None`). If `None`, defaults to `3p/4` if p < 200 and `p/2` otherwise.
-- `Z_sparse`: If `True`, the output tensor of subsamples, `Z`, is returned as sparse (default is `False`).
-- `lars`: If `True`, uses the least angle regression (LARS) for linear regression; otherwise, uses lasso (default is `False`).
-- `selection_function`: Function to apply to the estimated selection probabilities. If equal to an integer, `m`, then the function is `h_m(x) = (2x - 1)**m` if `x >= 0.5` and `0` if `x < 0.5`. It can be an integer, a callable, or `None` (default is `None`, in which case the function is `h_2` if response is binary, or `h_3` if continuous).
+- `q_max`: Max number of features selected (int; default is `None`). If `None`, defaults to `3p/4` if p < 200 and `p/2` otherwise.
+- `Z_sparse`: If `True`, output tensor of subsamples, `Z`, is sparse (default is `False`). Can help save space.
+- `lars`: If `True`, uses least angle regression (LARS) for linear regression; otherwise, uses lasso (default is `False`).
+- `selection_function`: Function to apply to the estimated selection probabilities. If equal to a positive integer, `m`, function is `h_m(x) = (2x - 1)**m` if `x >= 0.5` and `0` if `x < 0.5`. It can be an integer, a callable, or `None` (default is `None`, in which case the function is `h_2` if response is binary, or `h_3` if continuous).
 - `with_stability`: If `True`, uses a stability measure in the selection process (default is `False`).
 - `delta`: Scalar that determines the scaling of the regularization interval. `delta = 1` corresponds to log scale, and `delta = 0` corresponds to linear scale (default is `1`).
 - `standardize_X`: If `True`, standardizes each feature in `X` by removing the mean and scaling to unit variance (default is `True`).
