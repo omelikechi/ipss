@@ -9,14 +9,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 sys.path.append('/Users/omm793/iCloud/code/packages/ipss')
-from ipss.ipss import ipss
+from src.ipss import ipss
 
 
 #--------------------------------
 # Load data
 #--------------------------------
 # select data type (reverse phase protein array (rppa) or microRNA (mirna))
-data_type = 'mirna'
+data_type = 'rppa'
 if data_type == 'rppa':
 	data = np.load('prostate_rppa.npy', allow_pickle=True).item()
 if data_type == 'mirna':

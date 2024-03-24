@@ -10,7 +10,7 @@ import numpy as np
 import seaborn as sns
 
 sys.path.append('/Users/omm793/iCloud/code/packages/ipss')
-from ipss.ipss import ipss
+from src.ipss import ipss
 
 
 #--------------------------------
