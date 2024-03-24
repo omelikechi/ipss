@@ -60,7 +60,7 @@ print(result['selected_features'])  # features selected by IPSS
 - `lars`: Implements least angle regression (LARS) for linear regression if `True`, lasso otherwise (default is `False`).
 - `selection_function`: Function to apply to the stability paths. If a positive int, `m`, function is `h_m(x) = (2x - 1)**m` if `x >= 0.5` and `0` if `x < 0.5` (int, callable, or `None`; default is `None`, in which case function is `h_2` if y is binary, or `h_3` if continuous).
 - `with_stability`: If `True`, uses a stability measure in the selection process (default is `False`).
-- `delta`: Determines scaling of regularization interval (float; default is `1`).
+- `delta`: Determines scaling of regularization interval (scalar; default is `1`).
 - `standardize_X`: If `True`, standardizes each feature in `X` (default is `True`).
 - `center_y`: If `True`, centers `y` if it is continuous (default is `True`).
 
