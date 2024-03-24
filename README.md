@@ -44,13 +44,13 @@ print(result['selected_features'])  # features selected by IPSS
 - `scores`: IPSS scores for each feature (numpy array of size `(p,)`).
 - `selected_features`: Indices of the features selected by IPSS (list of ints).
 - `stability_paths`: Estimated selection probabilities for each feature at each regularization value (numpy array of size `(n_alphas, p)`)
-- `stop_index`: Index of the regularization value at which the IPSS threshold is passed (integer).
+- `stop_index`: Index of the regularization value at which the IPSS threshold is passed (int).
 - `threshold`: The calculated threshold value tau = Integral value / EFP (float).
 
 ### Full ist of arguments
 `ipss` takes the following arguments:
 - `X`: Feature matrix (numpy array of size `(n,p)`).
-- `y`: Vector of responses (numpy array with shape `(n,)` or `(n, 1)`). IPSS automatically detects whether y is continuous (lasso or LARS) or binary (logistic regression).
+- `y`: Vector of responses (numpy array with shape `(n,)` or `(n, 1)`). IPSS automatically detects whether y is continuous (in which case it runs lasso or LARS) or binary (in which case it runs L1-regularized logistic regression).
 - `EFP`: Target expected number of false positives (positive scalar; default is `1`).
 - `cutoff`: Positive scalar that, together with `EFP`, determines the IPSS threshold (default is `0.05`).
 - `B`: Number of subsampling steps (int; default is `50`).
