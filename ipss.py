@@ -1,7 +1,5 @@
 # Integrate path stability selection (IPSS)
 
-# testing
-
 import warnings
 
 from joblib import Parallel, delayed
