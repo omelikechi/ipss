@@ -1,10 +1,11 @@
 # Integrated path stability selection (IPSS)
 
-Python implementation of integrated path stability selection (IPSS)
+Integrated path stability selection (IPSS) is a general method for improving feature selection algorithms. This package
+is a Python implementation of IPSS applied to L1-regularized linear and logistic regression.
 
 ## Associated paper
 
-arxiv:
+arXiv:
 
 ## Installation
 ### Dependencies
