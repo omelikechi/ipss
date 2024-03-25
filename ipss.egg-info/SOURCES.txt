@@ -1,0 +1,9 @@
+README.md
+setup.py
+ipss/__init__.py
+ipss/ipss.py
+ipss.egg-info/PKG-INFO
+ipss.egg-info/SOURCES.txt
+ipss.egg-info/dependency_links.txt
+ipss.egg-info/requires.txt
+ipss.egg-info/top_level.txt
