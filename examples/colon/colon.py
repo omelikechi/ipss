@@ -21,7 +21,7 @@ print(f'Data set contains {n} samples and {p} features')
 # order by cancerous first, then normal
 sorted_indices = np.argsort(y)
 y = y[sorted_indices] 
-X = X[sorted_indices] 
+X = X[sorted_indices]
 
 #--------------------------------
 # IPSS
