@@ -35,10 +35,9 @@ pip install matplotlib seaborn
 
 ## Examples
 Examples are available in the `examples` folder as both .py and .ipynb files. These include
-- Features simulated independently from a multivariate normal. [Click here to open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple/simple.ipynb)
-- An example using prostate cancer data, as detailed in the associated paper.
-- An example using colon cancer data, as detailed in the associated paper.
-
+- IPSS applied to data simulated from a multivariate normal. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple/simple.ipynb)
+- IPSS applied to prostate cancer data. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/prostate/prostate.ipynb)
+- IPSS applied to colon cancer data. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/colon/colon.ipynb)
 
 ## Usage
 Given an n-by-p matrix of features, X (n = number of samples, p = number of features), an n-by-1 vector of responses, y, and a target number of expected false positives, EFP: 
