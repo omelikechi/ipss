@@ -54,7 +54,7 @@ print(result['selected_features'])
 ```
 
 ### Results
-`result` is a dictionary containing:
+`result = ipss(X, y, EFP)` is a dictionary containing:
 - `alphas`: Grid of regularization parameters (array of shape `(n_alphas,)`).
 - `average_select`: Average number of features selected at each regularization (array of shape `(n_alphas,)`).
 - `scores`: IPSS score for each feature (array of shape `(p,)`).
