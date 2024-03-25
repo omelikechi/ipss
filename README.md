@@ -33,6 +33,13 @@ Additional dependencies to run examples:
 pip install matplotlib seaborn
 ```
 
+## Examples
+Examples are available in the `examples` folder as both .py and .ipynb files. These include
+- A simple example in which features are simulated independently from a multivariate normal. Colab link: [Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple/simple.ipynb)
+- An example using prostate cancer data, as detailed in the associated paper.
+- An example using colon cancer data, as detailed in the associated paper.
+
+
 ## Usage
 Given an n-by-p matrix of features, X (n = number of samples, p = number of features), an n-by-1 vector of responses, y, and a target number of expected false positives, EFP: 
 ```python
@@ -73,12 +80,6 @@ print(result['selected_features'])  # features selected by IPSS
 - `delta`: Determines scaling of regularization interval (scalar; default is `1`).
 - `standardize_X`: If `True`, standardizes all features (default is `True`).
 - `center_y`: If `True`, centers `y` when it is continuous (default is `True`).
-
-## Examples
-Examples are available in the `examples` folder. These include
-- A simple example in which features are simulated independently from a standard normal distribution.
-- An example using prostate cancer data, as detailed in the associated paper.
-- An example using colon cancer data, as detailed in the associated paper.
 
 
 
