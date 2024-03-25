@@ -2,3 +2,4 @@ dist/
 build/
 ipss.egg-info/
 .DS_Store
+__pycache__/
