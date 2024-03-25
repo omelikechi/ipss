@@ -35,7 +35,7 @@ pip install matplotlib seaborn
 
 ## Examples
 Examples are available in the `examples` folder as both .py and .ipynb files. These include
-- A simple example in which features are simulated independently from a multivariate normal. Colab link: [Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple/simple.ipynb)
+- Features simulated independently from a multivariate normal. [Click here to open as a notebook in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple/simple.ipynb)
 - An example using prostate cancer data, as detailed in the associated paper.
 - An example using colon cancer data, as detailed in the associated paper.
 
