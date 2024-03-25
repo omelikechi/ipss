@@ -91,22 +91,22 @@ plt.show()
 #--------------------------------
 names = [feature_names[i] for i in selected_features]
 
-X = X[:,selected_features]
+X_select = X[:,selected_features]
 
 n_normal = np.sum(y)
 n_cancerous = n - n_normal
 
 avg_expression_cancerous = []
 for i in range(len(selected_features)):
-    avg_expression_cancerous.append(np.mean(X[:n_cancerous,i]))
+    avg_expression_cancerous.append(np.mean(X_select[:n_cancerous,i]))
 
 sorted_indices = np.argsort(avg_expression_cancerous)
-X = X[:,sorted_indices]
+X_select = X_select[:,sorted_indices]
 names = [names[i] for i in sorted_indices]
 
 # plot the heatmap
 plt.figure(figsize=(8,6))
-sns.heatmap(X, cmap='binary')
+sns.heatmap(X_select, cmap='binary')
 
 # draw vertical lines to separate the regions
 plt.axhline(y=n_cancerous, color='red', linestyle='--', linewidth=3)
@@ -117,8 +117,7 @@ plt.text(-1/2, n_cancerous + n_normal / 2, 'Normal', ha='center', va='center', r
 
 # set tick rotation for x-axis
 plt.xticks(np.arange(len(names)), names, rotation=45, ha='left')
-for tick, color in zip(plt.gca().get_xticklabels(), colors):
-    tick.set_color(color)
+for tick in plt.gca().get_xticklabels():
     tick.set_weight('bold')
 plt.yticks([])
 

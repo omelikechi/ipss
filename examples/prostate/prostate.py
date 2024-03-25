@@ -3,10 +3,9 @@
 Data freely available here: https://www.linkedomics.org/data_download/TCGA-PRAD/ 
 '''
 
+from ipss import ipss
 import numpy as np
 import matplotlib.pyplot as plt
-
-from ipss import ipss
 
 
 #--------------------------------
@@ -21,7 +20,7 @@ if data_type == 'mirna':
 
 X, y, feature_names = data['X'], data['y'], data['feature_names']
 n, p = X.shape
-print(f'Data set contains {n} samples and {p} features')
+print(f'The {data_type} data set contains {n} samples and {p} features')
 
 #--------------------------------
 # IPSS
