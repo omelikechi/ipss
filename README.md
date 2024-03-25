@@ -28,7 +28,7 @@ For `ipss`:
 ```
 pip install joblib numpy scikit-learn scipy
 ```
-Additional dependencies to run examples:
+Additional dependencies required for examples:
 ```
 pip install matplotlib seaborn
 ```
@@ -40,17 +40,17 @@ Examples are available in the `examples` folder as both .py and .ipynb files. Th
 - IPSS applied to colon cancer data. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/colon/colon.ipynb)
 
 ## Usage
-Given an n-by-p matrix of features, X (n = number of samples, p = number of features), an n-by-1 vector of responses, y, and a target number of expected false positives, EFP: 
+Given an n-by-p numpy array of features, X (n = number of samples, p = number of features), an n-by-1 numpy array of responses, y, and a target number of expected false positives, EFP: 
 ```python
 from ipss import ipss
 
-# Load data X and y
-# Specify expected number of false positives (EFP)
+# Load/generate X and y
+# Specify EFP
 # Run IPSS:
 result = ipss(X, y, EFP)
 
-# Result analysis
-print(result['selected_features'])  # features selected by IPSS
+# Print indices of features selected by IPSS
+print(result['selected_features'])
 ```
 
 ### Results
