@@ -3,3 +3,6 @@ build/
 ipss.egg-info/
 .DS_Store
 __pycache__/
+ipss/__pycache__/
+examples/.DS_Store
+examples/prostate/.DS_Store
