@@ -8,7 +8,7 @@ the X (features) and y (response) data and specification of E(FP).
 
 ## Associated paper
 
-arXiv:
+arXiv: [https://arxiv.org/abs/2403.15877](https://arxiv.org/abs/2403.15877)
 
 ## Installation
 To install from PyPI:
