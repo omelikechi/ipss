@@ -34,7 +34,7 @@ pip install matplotlib seaborn
 ```
 
 ## Examples
-Examples are available in the `examples` folder as both .py and .ipynb files. These include
+Examples are available in the [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder as both .py and .ipynb files. These include
 - IPSS applied to data simulated from a multivariate normal. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple/simple.ipynb)
 - IPSS applied to prostate cancer data. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/prostate/prostate.ipynb)
 - IPSS applied to colon cancer data. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/colon/colon.ipynb)
