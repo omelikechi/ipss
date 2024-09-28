@@ -94,7 +94,7 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 #### Optional Arguments:
 - `selector`: Base algorithm to use (default `'gb'`). Options are:
   - `'gb'`: Gradient boosting with XGBoost.
-  - `'l1'`: L1-regularized linear (regression) or logistic (classification) regression.
+  - `'l1'`: L1-regularized linear or logistic regression.
   - `'rf'`: Random forest. 
 - `selector_args`: Arguments for the base algorithm (default `None`).
 - `target_fp`: Target number of false positives to control (positive scalar; default `None`).
@@ -123,7 +123,7 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
   - `selector_args` include, e.g., decision tree parameters for tree-based models
   - Results are robust to `B` provided it is bigger than `25`
   - Results are robust to `n_alphas` provided it is bigger than `50`
-  - `'h3` yields the most true positives. `h2` is more conservative, and `h1` even more so.
+  - `'h3'` yields the most true positives. `'h2'` is more conservative, and `'h1'` even more so.
   - Preselection can significantly reduce computation time. Results are robust otherwise.
   - Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
   - Results are robust to `delta` provided it is between `0` and `1.5`.
