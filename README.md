@@ -92,30 +92,45 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `X`: Features (array of shape `(n, p)`), where `n` is the number of samples and `p` is the number of features.
 - `y`: Response (array of shape `(n,)` or `(n, 1)`). IPSS automatically detects if `y` is continuous or binary.
 #### Optional Arguments:
-- `selector`: Base algorithm to use. Options are:
+- `selector`: Base algorithm to use (default `'gb'`). Options are:
   - `'gb'`: Gradient boosting with XGBoost.
   - `'l1'`: L1-regularized linear (regression) or logistic (classification) regression.
-  - `'rf'`: Random forest.  
-  (Default is `'gb'`).
-- `selector_args`: Arguments for the base algorithm (default is `None`).
-- `target_fp`: Target number of false positives to control (positive scalar; default is `None`).
-- `target_fdr`: Target false discovery rate (FDR) (positive scalar; default is `None`).
-- `B`: Number of subsampling steps (int; default is `100` for IPSSGB, `50` otherwise).
-- `n_alphas`: Number of values in the regularization or threshold grid (int; default is `25`).
-- `ipss_function`: Function to apply to selection probabilities. Options are:
+  - `'rf'`: Random forest. 
+- `selector_args`: Arguments for the base algorithm (default `None`).
+- `target_fp`: Target number of false positives to control (positive scalar; default `None`).
+- `target_fdr`: Target false discovery rate (FDR) (positive scalar; default `None`).
+- `B`: Number of subsampling steps (int; default `100` for IPSSGB, `50` otherwise).
+- `n_alphas`: Number of values in the regularization or threshold grid (int; default `100`).
+- `ipss_function`: Function to apply to selection probabilities (default `'h3'`). Options are:
   - `'h1'`: Linear function, ```h1(x) = 2x - 1 if x >= 0.5 else 0```.
   - `'h2'`: Quadratic function, ```h2(x) = (2x - 1)**2 if x >= 0.5 else 0```.
   - `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
-  (Default is `'h3'`).
-- `preselect`: Number (if int) or percentage (if float `0 < preselect <= 1`) of features to preselect. Set to `False` for no preselection (default is `0.05`).
-- `preselect_min`: Minimum number of features to keep in the preselection step (int; default is `200`).
-- `preselect_args`: Arguments for the preselection algorithm (default is `None`).
-- `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive scalar; default is `0.05`).
-- `delta`: Defines probability measure `mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda` (scalar; default is `1`).
-- `standardize_X`: Whether to scale features to have mean 0, standard deviation 1 (Boolean or `None`; default is `None`).
-- `center_y`: Whether to center the response to have mean 0 (Boolean or `None`; default is `None`).
-- `true_features`: List of true feature indices when known, e.g., in simulations (default is `None`).
-- `n_jobs`: Number of jobs to run in parallel (int; default is `1`).
+- `preselect`: Number (if int) or percentage (if float `0 < preselect <= 1`) of features to preselect. Set to `False` for no preselection (default `0.05`).
+- `preselect_min`: Minimum number of features to keep in the preselection step (int; default `200`).
+- `preselect_args`: Arguments for the preselection algorithm (default `None`).
+- `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive scalar; default `0.05`).
+- `delta`: Defines probability measure `mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda` (scalar; default `1`).
+- `standardize_X`: Whether to scale features to have mean 0, standard deviation 1 (Boolean or `None`; default `None`).
+- `center_y`: Whether to center the response to have mean 0 (Boolean or `None`; default `None`).
+- `true_features`: List of true feature indices when known, e.g., in simulations (default `None`).
+- `n_jobs`: Number of jobs to run in parallel (int; default `1`).
+
+#### General observations/recommendations:
+- IPSSGB is usually best for capturing nonlinear relationships between features and response
+- IPSSL is usually best for capturing linear relationships between features and response
+- `target_fp` or `target_fdr` (at most one is specified) are problem specific/left to the user
+- In general, all other parameters should not changed
+  - `selector_args` include, e.g., decision tree parameters for tree-based models
+  - Results are robust to `B` provided it is bigger than `25`
+  - Results are robust to `n_alphas` provided it is bigger than `50`
+  - `'h3` yields the most true positives. `h2` is more conservative, and `h1` even more so.
+  - Preselection can significantly reduce computation time. Results are robust otherwise.
+  - Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
+  - Results are robust to `delta` provided it is between `0` and `1.5`.
+  - Standardization is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
+  - Centering `y` is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
+
+
 
 
 
