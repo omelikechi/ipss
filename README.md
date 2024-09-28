@@ -6,19 +6,19 @@ applies a base selection algorithm to subsamples of the data to select features 
 to y. This package includes IPSS for gradient boosting (IPSSGB), L1-regularized linear models (IPSSL), and for random
 forests (IPSSRF). The final outputs are **efp scores** and **q-values** for each feature in X.
 
-- The **efp score** of feature j is the expected number of false positives selected when j is identified as significant. 
-- The **q-value** of feature j is the false discovery rate (FDR) when feature j is identified as significant.
+- The **efp score** of feature j is the expected number of false positives selected when j is selected. 
+- The **q-value** of feature j is the false discovery rate (FDR) when feature j is selected.
 
 ### Key features
-- **Error control:** IPSS controls the number of false positives or the FDR, whichever is preferred.
+- **Error control:** IPSS controls the number of false positives and the FDR.
 - **Generality:** IPSSGB and IPSSRF are nonlinear, nonparametric methods. IPSSL is linear.
-- **Speed:** IPSS is efficient. For example, IPSSGB runs in under 20 seconds on datasets with 500 samples and 5000 features.
-- **Simplicity:** The only required inputs are `X` and `y`. Users can also specify the type of IPSS (IPSSGB, IPSSRF, or IPSSL), 
-and either the target number of false positives or target FDR.
+- **Speed:** IPSS is efficient. For example, IPSSGB runs in <20 seconds when `n = 500` and `p = 5000`.
+- **Simplicity:** The only required inputs are `X` and `y`. Users can also specify the base method (IPSSGB, IPSSRF, or IPSSL), 
+and the target number of false positives or the target FDR.
 
 ## Associated papers
 
-**IPSSL:** [https://arxiv.org/abs/2403.15877](https://arxiv.org/abs/2403.15877)
+**IPSSL:** [https://arxiv.org/abs/2403.15877](https://arxiv.org/abs/2403.15877) <br>
 **IPSSGB and IPSSRF:** 
 
 ## Installation
@@ -100,21 +100,21 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `selector_args`: Arguments for the base algorithm (default is `None`).
 - `target_fp`: Target number of false positives to control (positive scalar; default is `None`).
 - `target_fdr`: Target false discovery rate (FDR) (positive scalar; default is `None`).
-- `B`: Number of subsampling steps when computing selection probabilities (int; default is `50`).
+- `B`: Number of subsampling steps (int; default is `100` for IPSSGB, `50` otherwise).
 - `n_alphas`: Number of values in the regularization or threshold grid (int; default is `25`).
 - `ipss_function`: Function to apply to selection probabilities. Options are:
-  - `'h1'`: Linear function, ```python h1(x) = 2*x - 1 if x >= 0.5 else 0```.
-  - `'h2'`: Quadratic function, ```python h2(x) = (2*x - 1)**2 if x >= 0.5 else 0```.
-  - `'h3'`: Cubic function, ```python h3(x) = (2*x - 1)**3 if x >= 0.5 else 0```.
+  - `'h1'`: Linear function, ```h1(x) = 2x - 1 if x >= 0.5 else 0```.
+  - `'h2'`: Quadratic function, ```h2(x) = (2x - 1)**2 if x >= 0.5 else 0```.
+  - `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
   (Default is `'h3'`).
 - `preselect`: Number (if int) or percentage (if float `0 < preselect <= 1`) of features to preselect. Set to `False` for no preselection (default is `0.05`).
 - `preselect_min`: Minimum number of features to keep in the preselection step (int; default is `200`).
 - `preselect_args`: Arguments for the preselection algorithm (default is `None`).
 - `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive scalar; default is `0.05`).
-- `delta`: Defines the probability measure `mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda` (scalar; default is `1`).
-- `standardize_X`: Whether to standardize features to have mean 0 and standard deviation 1 (Boolean or `None`; default is `None`).
+- `delta`: Defines probability measure `mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda` (scalar; default is `1`).
+- `standardize_X`: Whether to scale features to have mean 0, standard deviation 1 (Boolean or `None`; default is `None`).
 - `center_y`: Whether to center the response to have mean 0 (Boolean or `None`; default is `None`).
-- `true_features`: List of true feature indices when known, for example, in simulation experiments (default is `None`).
+- `true_features`: List of true feature indices when known, e.g., in simulations (default is `None`).
 - `n_jobs`: Number of jobs to run in parallel (int; default is `1`).
 
 
