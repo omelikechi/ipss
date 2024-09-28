@@ -109,9 +109,9 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `preselect_min`: Minimum number of features to keep in the preselection step (int; default `200`).
 - `preselect_args`: Arguments for the preselection algorithm (default `None`).
 - `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive scalar; default `0.05`).
-- `delta`: Defines probability measure `mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda` (scalar; default `1`).
-- `standardize_X`: Whether to scale features to have mean 0, standard deviation 1 (Boolean or `None`; default `None`).
-- `center_y`: Whether to center the response to have mean 0 (Boolean or `None`; default `None`).
+- `delta`: Defines probability measure; see `Associated papers` (scalar; default `1`).
+- `standardize_X`: Scale features to have mean 0, standard deviation 1 (Boolean or `None`; default `None`).
+- `center_y`: Center response to have mean 0 (Boolean or `None`; default `None`).
 - `true_features`: List of true feature indices when known, e.g., in simulations (default `None`).
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
 
