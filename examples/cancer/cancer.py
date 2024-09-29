@@ -38,7 +38,7 @@ X, y, feature_names = data['X'], data['Y'], data['feature_names']
 #--------------------------------
 # Run IPSS
 #--------------------------------
-ipss_result = ipss(X, y, selector='gb')
+ipss_output = ipss(X, y, selector='gb')
 
 #--------------------------------
 # Analyze results
@@ -49,7 +49,7 @@ plot_efp_scores = True
 # plot q-values for all features with q-values below a certain threshold
 if plot_q_values:
 	q_value_threshold = 0.5
-	q_values = ipss_result['q_values']
+	q_values = ipss_output['q_values']
 	q_values = [(index, q_value) for (index, q_value) in q_values if q_value <= q_value_threshold]
 
 	plt.figure(figsize=(10, 6))
@@ -63,7 +63,7 @@ if plot_q_values:
 # plot efp scores for all features with efp scores below a certain threshold
 if plot_efp_scores:
 	efp_score_threshold = 5
-	efp_scores = ipss_result['efp_scores']
+	efp_scores = ipss_output['efp_scores']
 	efp_scores = [(index, q_value) for (index, q_value) in efp_scores if q_value <= efp_score_threshold]
 
 	plt.figure(figsize=(10, 6))
