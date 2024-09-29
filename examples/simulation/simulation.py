@@ -18,7 +18,7 @@ n = 500 # number of samples
 p = 500 # number of features
 n_true = 20 # number of true features
 snr = 2 # signal-to-noise ratio
-nonlinear = generate_features # linear or nonlinear relationship between features and response
+nonlinear = True # linear or nonlinear relationship between features and response
 response_type = 'continuous' # 'binary' for classification or 'continuous' for regression
 
 # generate features
@@ -43,7 +43,7 @@ ipss_result = ipss(X, y, selector='gb')
 # Analyze results
 #--------------------------------
 """
-Note: This is just one simulation; true E(FP) and FDR behavior is best revealed by averaging over repeated simulations
+Note: This is just one simulation; actual E(FP) and FDR performance is best seen by averaging over repeated simulations
 """
 plot_target_fdr = True
 plot_target_efp = True

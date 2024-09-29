@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-# import main ipss function
 from ipss import ipss
 
 # set random seed
@@ -20,7 +19,6 @@ snr = 1 # signal-to-noise ratio
 
 # generate and standardize features
 X = np.random.normal(0, 1, size=(n,p))
-X = StandardScaler().fit_transform(X)
 
 # randomly select true features
 true_features = np.random.choice(p, size=n_true, replace=False)
@@ -31,7 +29,6 @@ beta[true_features] = np.random.normal(0, 1, size=(n_true))
 signal = X @ beta
 noise = np.sqrt(np.var(signal) / snr)
 y = signal + np.random.normal(0, noise, size=n)
-y -= np.mean(y)
 
 # function for counting the number of true and false positives
 def count_tp_fp(selected_features, true_features):
@@ -48,6 +45,9 @@ def count_tp_fp(selected_features, true_features):
 #--------------------------------
 ipss_output = ipss(X, y, selector='gb')
 
+#--------------------------------
+# Analyze results
+#--------------------------------
 runtime = ipss_output['runtime']
 print(f'Runtime: {np.round(runtime,2)} seconds')
 print(f'')
