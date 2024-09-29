@@ -29,9 +29,9 @@ pip install ipss
 
 ## Examples
 Examples are available in the [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder. These include
-- A simple example in `simple_example.py`. [Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)
-- Various simulation experiments in `simulation.py`. [Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simulation/simulation.ipynb)
-- IPSS applied to ovarian and prostate cancer data in `cancer.py`. [Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer/cancer.ipynb)
+- A simple example, `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
+- Various simulation experiments, `simulation.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simulation/simulation.ipynb)).
+- IPSS applied to cancer data, `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer/cancer.ipynb)).
 
 ## Usage
 ```python
