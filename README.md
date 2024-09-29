@@ -65,15 +65,17 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 `ipss_output = ipss(X, y)` is a dictionary containing:
 - `efp_scores`: List of tuples `(feature_index, efp_score)` with features ordered by their efp scores from smallest to largest (list of length `p`).
 - `q_values`: List of tuples `(feature_index, q_value)` with features ordered by their q-values from smallest to largest (list of length `p`).
-- `runtime`: The runtime of algorithm in seconds.
+- `runtime`: The runtime of the algorithm in seconds (float).
 - `selected_features`: List of indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
 
 ### Full list of arguments
-`ipss` takes the following arguments (only `X` and `y` are required):
+
+#### Required arguments:
 - `X`: Features (array of shape `(n, p)`), where `n` is the number of samples and `p` is the number of features.
 - `y`: Response (array of shape `(n,)` or `(n, 1)`). IPSS automatically detects if `y` is continuous or binary.
-#### Optional Arguments:
+
+#### Optional arguments:
 - `selector`: Base algorithm to use (default `'gb'`). Options are:
   - `'gb'`: Gradient boosting with XGBoost.
   - `'l1'`: L1-regularized linear or logistic regression.

@@ -50,6 +50,7 @@ ipss_output = ipss(X, y, selector='gb')
 
 runtime = ipss_output['runtime']
 print(f'Runtime: {np.round(runtime,2)} seconds')
+print(f'')
 
 # select features based on target number of false positives
 target_fp = 1
