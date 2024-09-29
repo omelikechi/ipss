@@ -1,7 +1,6 @@
 # Functions for loading LinkedOmics data
 
 
-from io import StringIO
 import numpy as np
 import pandas as pd
 
