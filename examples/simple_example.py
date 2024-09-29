@@ -12,10 +12,10 @@ np.random.seed(1)
 #--------------------------------
 # Generate data
 #--------------------------------
-n = 500 # number of samples
-p = 1000 # number of features
+n = 250 # number of samples
+p = 500 # number of features
 n_true = 20 # number of true features
-snr = 1 # signal-to-noise ratio
+snr = 2 # signal-to-noise ratio
 
 # generate and standardize features
 X = np.random.normal(0, 1, size=(n,p))
@@ -43,7 +43,7 @@ def count_tp_fp(selected_features, true_features):
 #--------------------------------
 # Run IPSS
 #--------------------------------
-ipss_output = ipss(X, y, selector='gb')
+ipss_output = ipss(X, y, selector='l1')
 
 #--------------------------------
 # Analyze results
