@@ -1,9 +1,7 @@
 # Functions for loading LinkedOmics data
 
-
 import numpy as np
 import pandas as pd
-
 
 def load_data(cancer_type, feature_types, response=None, remove_nan=True, correlation_threshold=0.999, see_names=False, verbose=False):
 
