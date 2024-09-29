@@ -65,16 +65,14 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 `ipss_output = ipss(X, y)` is a dictionary containing:
 - `efp_scores`: List of tuples `(feature_index, efp_score)` with features ordered by their efp scores from smallest to largest (list of length `p`).
 - `q_values`: List of tuples `(feature_index, q_value)` with features ordered by their q-values from smallest to largest (list of length `p`).
-- `runtime`: The runtime of the algorithm in seconds (float).
+- `runtime`: Runtime of the algorithm in seconds (float).
 - `selected_features`: List of indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
 
-### Full list of arguments
-
+### Full list of `ipss` arguments
 #### Required arguments:
 - `X`: Features (array of shape `(n, p)`), where `n` is the number of samples and `p` is the number of features.
 - `y`: Response (array of shape `(n,)` or `(n, 1)`). IPSS automatically detects if `y` is continuous or binary.
-
 #### Optional arguments:
 - `selector`: Base algorithm to use (default `'gb'`). Options are:
   - `'gb'`: Gradient boosting with XGBoost.
@@ -98,7 +96,6 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `center_y`: Center response to have mean 0 (Boolean or `None`; default `None`).
 - `true_features`: List of true feature indices when known, e.g., in simulations (default `None`).
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
-
 #### General observations/recommendations:
 - IPSSGB is usually best for capturing nonlinear relationships between features and response
 - IPSSL is usually best for capturing linear relationships between features and response
