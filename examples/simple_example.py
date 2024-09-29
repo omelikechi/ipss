@@ -5,10 +5,10 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 # import main ipss function
-from ipss.main import ipss
+from ipss import ipss
 
 # set random seed
-np.random.seed(302)
+np.random.seed(1)
 
 #--------------------------------
 # Generate data
@@ -18,15 +18,15 @@ p = 1000 # number of features
 n_true = 20 # number of true features
 snr = 1 # signal-to-noise ratio
 
-# generate true features
-beta = np.zeros(p)
-true_features = np.random.choice(p, size=n_true, replace=False)
-
 # generate and standardize features
 X = np.random.normal(0, 1, size=(n,p))
 X = StandardScaler().fit_transform(X)
 
+# randomly select true features
+true_features = np.random.choice(p, size=n_true, replace=False)
+
 # generate and center response variable y
+beta = np.zeros(p)
 beta[true_features] = np.random.normal(0, 1, size=(n_true))
 signal = X @ beta
 noise = np.sqrt(np.var(signal) / snr)
@@ -47,6 +47,9 @@ def count_tp_fp(selected_features, true_features):
 # Run IPSS
 #--------------------------------
 ipss_output = ipss(X, y, selector='gb')
+
+runtime = ipss_output['runtime']
+print(f'Runtime: {np.round(runtime,2)} seconds')
 
 # select features based on target number of false positives
 target_fp = 1

@@ -3,13 +3,13 @@
 Integrated path stability selection (IPSS) is a general method for improving feature selection algorithms. Given an
 n-by-p data matrix X (n = number of samples, p = number of features), and an n-dimensional response variable y, IPSS
 applies a base selection algorithm to subsamples of the data to select features (columns of X) that are most related
-to y. This package includes IPSS for gradient boosting (IPSSGB), L1-regularized linear models (IPSSL), and for random
-forests (IPSSRF). The final outputs are **efp scores** and **q-values** for each feature in X.
+to y. This package includes IPSS for gradient boosting (IPSSGB), random forests (IPSSRF), and L1-regularized linear 
+models (IPSSL). The final outputs are **efp scores** and **q-values** for each feature in X.
 
 - The **efp score** of feature j is the expected number of false positives selected when j is selected. 
 - The **q-value** of feature j is the false discovery rate (FDR) when feature j is selected.
 
-### Key features
+### Key attributes
 - **Error control:** IPSS controls the number of false positives and the FDR.
 - **Generality:** IPSSGB and IPSSRF are nonlinear, nonparametric methods. IPSSL is linear.
 - **Speed:** IPSS is efficient. For example, IPSSGB runs in <20 seconds when `n = 500` and `p = 5000`.
@@ -26,23 +26,6 @@ To install from PyPI:
 ```
 pip install ipss
 ```
-To clone from GitHub:
-```
-git clone git@github.com:omelikechi/ipss.git
-```
-Or clone from GitHub using HTTPS:
-```
-git clone https://github.com/omelikechi/ipss.git
-```
-### Dependencies
-For `ipss`:
-```
-pip install joblib numpy scikit-learn xgboost
-```
-Additional dependencies required for examples:
-```
-pip install matplotlib
-```
 
 ## Examples
 Examples are available in the [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder as both .py and .ipynb files. These include
@@ -51,7 +34,6 @@ Examples are available in the [examples](https://github.com/omelikechi/ipss/tree
 - IPSS applied to colon cancer data. [Open in Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/colon/colon.ipynb) -->
 
 ## Usage
-Given an n-by-p numpy array of features, X (n = number of samples, p = number of features), and an n-by-1 numpy array of responses:
 ```python
 from ipss import ipss
 
