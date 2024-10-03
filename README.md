@@ -29,21 +29,21 @@ pip install ipss
 
 ## Tests
 Two test scripts are included to validate IPSS:
-- **Basic test** (`basic_test.py`)
-  - To run the test:
-  ```
-  python3 basic_test.py
-  ```
-  - Expected output: "All tests passed."
+**Basic test** (`basic_test.py`)
+- To run the test:
+```
+python3 basic_test.py
+```
+- Expected output: "All tests passed."
 
-- **Test on ovarian cancer microRNA data** (`oc_mirna_test.py`)
-  - Applies IPSS to ovarian cancer data downloaded from [LinkedOmics][https://www.linkedomics.org/data_download/TCGA-OV/]
-  - Datasets are also located in `examples/cancer/ovarian`
-  - To run the test:
-  ```
-  python3 oc_mirna_test.py
-  ```
-  - Expected output: printed q-values and efp scores of the top ranked microRNA
+**Test on ovarian cancer microRNA data** (`oc_mirna_test.py`)
+- Identify microRNA (features) related to tumor purity (response) using ovarian cancer data from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/)
+- Datasets are also located in `examples/cancer/ovarian`
+- To run the test:
+```
+python3 oc_mirna_test.py
+```
+- Expected output: printed q-values and efp scores of the top ranked microRNA
 
 ## Usage
 ```python
