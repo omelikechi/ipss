@@ -22,7 +22,7 @@ and the target number of false positives or the target FDR.
 **IPSSGB and IPSSRF:** 
 
 ## Installation
-To install from PyPI:
+Install from PyPI:
 ```
 pip install ipss
 ```
@@ -35,14 +35,14 @@ python3 basic_test.py
 ```
 - Expected output: "All tests passed."
 
-**Ovarian cancer microRNAs and tumor purity data** (`oc_mirna_test.py`)
-- Identify microRNAs related to ovarian cancer tumor purity using data from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/)
-- Datasets are also located in `examples/cancer/ovarian`
+**Ovarian cancer: microRNAs and tumor purity** (`oc_mirna_test.py`)
+- Identify microRNAs related to ovarian cancer tumor purity 
+- Data is from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/cancer/ovarian`
 - Run the test:
 ```
 python3 oc_mirna_test.py
 ```
-- Expected output: printed q-values and efp scores of the top ranked microRNAs
+- Expected output: q-values and efp scores for the top ranked microRNAs
 
 ## Usage
 ```python
