@@ -37,7 +37,7 @@ y, true_features = generate_response(X, n_true, snr, nonlinear=nonlinear, respon
 #--------------------------------
 # Run IPSS
 #--------------------------------
-ipss_result = ipss(X, y, selector='gb')
+ipss_output = ipss(X, y, selector='gb')
 
 #--------------------------------
 # Analyze results
@@ -51,7 +51,7 @@ plot_stability_paths = True
 
 if plot_target_fdr:
 	target_fdrs = [0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.45, 0.5]
-	q_values = ipss_result['q_values']
+	q_values = ipss_output['q_values']
 	tprs, fdrs = np.zeros_like(target_fdrs), np.zeros_like(target_fdrs)
 	for i, target_fdr in enumerate(target_fdrs):
 		selected_features = [feature for (feature, q_value) in q_values if q_value <= target_fdr]
@@ -79,7 +79,7 @@ if plot_target_fdr:
 
 if plot_target_efp:
 	target_efps = [1/8, 1/4, 1/2, 1, 2, 3, 4, 5]
-	efp_scores = ipss_result['efp_scores']
+	efp_scores = ipss_output['efp_scores']
 	tps, fps = np.zeros_like(target_efps), np.zeros_like(target_efps)
 	for i, target_efp in enumerate(target_efps):
 		selected_features = [feature for (feature, efp_score) in efp_scores if efp_score <= target_efp]
@@ -102,7 +102,7 @@ if plot_target_efp:
 	plt.show()
 
 if plot_stability_paths:
-	stability_paths = ipss_result['stability_paths']
+	stability_paths = ipss_output['stability_paths']
 	n_alphas, p = stability_paths.shape
 
 	# blue paths for true features, gray for false features

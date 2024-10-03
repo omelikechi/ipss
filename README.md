@@ -27,17 +27,29 @@ To install from PyPI:
 pip install ipss
 ```
 
-## Examples
-Examples are available in the [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder. These include
-- A simple example, `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
-- Various simulation experiments, `simulation.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simulation/simulation.ipynb)).
-- IPSS applied to cancer data, `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer/cancer.ipynb)).
+## Tests
+Two test scripts are included to validate IPSS:
+- **Basic test** (`basic_test.py`)
+  - To run the test:
+  ```
+  python3 basic_test.py
+  ```
+  - Expected output: "All tests passed."
+
+- **Test on ovarian cancer microRNA data** (`oc_mirna_test.py`)
+  - Applies IPSS to ovarian cancer data downloaded from [LinkedOmics][https://www.linkedomics.org/data_download/TCGA-OV/]
+  - Datasets are also located in `examples/cancer/ovarian`
+  - To run the test:
+  ```
+  python3 oc_mirna_test.py
+  ```
+  - Expected output: printed q-values and efp scores of the top ranked microRNA
 
 ## Usage
 ```python
 from ipss import ipss
 
-# load data X and y
+# load n-by-p feature matrix X and n-by-1 response vector y
 
 # run ipss:
 ipss_output = ipss(X, y)
@@ -47,8 +59,8 @@ target_fp = 1
 efp_scores = ipss_output['efp_scores']
 selected_features = []
 for feature_index, efp_score in efp_scores:
-	if efp_score <= target_fp:
-		selected_features.append(feature_index)
+  if efp_score <= target_fp:
+    selected_features.append(feature_index)
 print(f'Selected features (target E(FP) = {target_fp}): {selected_features}')
 
 # select features based on target FDR
@@ -56,11 +68,10 @@ target_fdr = 0.1
 q_values = ipss_output['q_values']
 selected_features = []
 for feature_index, q_value in q_values:
-	if q_value <= target_fdr:
-		selected_features.append(feature_index)
+  if q_value <= target_fdr:
+    selected_features.append(feature_index)
 print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
-
 ### Results
 `ipss_output = ipss(X, y)` is a dictionary containing:
 - `efp_scores`: List of tuples `(feature_index, efp_score)` with features ordered by their efp scores from smallest to largest (list of length `p`).
@@ -69,13 +80,19 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `selected_features`: List of indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
 
-### Full list of `ipss` arguments
+## Examples
+Additional examples are available in the [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder. These include
+- A simple example, `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
+- Various simulation experiments, `simulation.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simulation/simulation.ipynb)).
+- IPSS applied to cancer data, `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer/cancer.ipynb)).
 
-#### Required arguments:
+## Full list of `ipss` arguments
+
+### Required arguments:
 - `X`: Features (array of shape `(n, p)`), where `n` is the number of samples and `p` is the number of features.
 - `y`: Response (array of shape `(n,)` or `(n, 1)`). `ipss` automatically detects if `y` is continuous or binary.
 
-#### Optional arguments:
+### Optional arguments:
 - `selector`: Base algorithm to use (str; default `'gb'`). Options are:
   - `'gb'`: Gradient boosting with XGBoost.
   - `'l1'`: L1-regularized linear or logistic regression.
@@ -99,7 +116,7 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `true_features`: List of true feature indices when known, e.g., in simulations (list; default `None`).
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
 
-#### General observations/recommendations:
+### General observations/recommendations:
 - IPSSGB is usually best for capturing nonlinear relationships between features and response
 - IPSSL is usually best for capturing linear relationships between features and response
 - `target_fp` or `target_fdr` (at most one is specified) are problem specific/left to the user

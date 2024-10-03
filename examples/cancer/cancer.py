@@ -3,8 +3,9 @@
 
 import matplotlib.pyplot as plt
 
-from ipss.main import ipss
-from load_cancer_data import load_data
+from ipss import ipss
+# from load_cancer_data import load_data
+from examples.cancer.load_cancer_data import load_data
 
 #--------------------------------
 # Available data options

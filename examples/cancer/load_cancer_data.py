@@ -1,16 +1,20 @@
 # Functions for loading LinkedOmics data
 
+import os
+
 import numpy as np
 import pandas as pd
 
 def load_data(cancer_type, feature_types, response=None, remove_nan=True, correlation_threshold=0.999, see_names=False, verbose=False):
 
+	base_path = os.path.join(os.path.dirname(__file__), cancer_type)
+	
 	file_paths = {
-		'clinical': cancer_type + '/clinical.txt',
-		'methylation': cancer_type + '/methylation.txt',
-		'mirna': cancer_type + '/mirna.txt',
-		'rnaseq': cancer_type + '/rnaseq.txt',
-		'rppa': cancer_type + '/rppa.txt'
+		'clinical': os.path.join(base_path, 'clinical.txt'),
+		'methylation': os.path.join(base_path, 'methylation.txt'),
+		'mirna': os.path.join(base_path, 'mirna.txt'),
+		'rnaseq': os.path.join(base_path, 'rnaseq.txt'),
+		'rppa': os.path.join(base_path, 'rppa.txt')
 	}
 
 	# initialize shared labels
