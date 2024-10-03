@@ -28,7 +28,6 @@ pip install ipss
 ```
 
 ## Tests
-Two test scripts are included to validate IPSS:
 **Basic test** (`basic_test.py`)
 - To run the test:
 ```
