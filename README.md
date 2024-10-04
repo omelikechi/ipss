@@ -6,8 +6,8 @@ applies a base selection algorithm to subsamples of the data to select features 
 to y. This package includes IPSS for gradient boosting (IPSSGB), random forests (IPSSRF), and L1-regularized linear 
 models (IPSSL). The final outputs are **efp scores** and **q-values** for each feature in X.
 
-- The **efp score** of feature j is the expected number of false positives selected when j is selected.
-  - So to control the expected number of false positives at `target_fp`, select all features with efp scores at most `target_fp` 
+- The **efp score** of feature j is the expected number of false positives, E(FP), selected when j is selected.
+  - So to control the E(FP) at `target_fp`, select all features with efp scores at most `target_fp` 
 - The **q-value** of feature j is the false discovery rate (FDR) when feature j is selected.
   - So to control the FDR at `target_fdr`, select all features with q-values at most `target_fdr` 
 
@@ -38,8 +38,8 @@ python3 basic_test.py
 - Expected output: "All tests passed."
 
 **Ovarian cancer: microRNAs and tumor purity** (`oc_mirna_test.py`)
-- Identify microRNAs related to ovarian cancer tumor purity 
-- Data is from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/cancer/ovarian`
+- Identify microRNAs related to tumor purity in tissue samples from ovarian cancer patients
+- Data are from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/cancer/ovarian`
 - Inputs:
   - Features: matrix of microRNA expression levels for `p = 585` microRNAs from `n = 451` patients
   - Response: tumor purity (proportion of cancerous cells in a tissue sample) from `n = 451` patients
