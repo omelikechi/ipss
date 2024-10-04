@@ -30,14 +30,14 @@ pip install ipss
 ```
 
 ## Tests
-**Basic test** (`basic_test.py`)
+**Basic test** (`test_basic.py`)
 - Run the test:
 ```
-python3 basic_test.py
+python3 test_basic.py
 ```
 - Expected output: "All tests passed."
 
-**Ovarian cancer: microRNAs and tumor purity** (`oc_mirna_test.py`)
+**Ovarian cancer: microRNAs and tumor purity** (`test_oc.py`)
 - Identify microRNAs related to tumor purity in tumor samples from ovarian cancer patients
 - Data are from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/cancer/ovarian`
 - Inputs:
@@ -45,7 +45,7 @@ python3 basic_test.py
   - Response: tumor purity (proportion of cancerous cells in a tissue sample) from `n = 451` patients
 - Run the test:
 ```
-python3 oc_mirna_test.py
+python3 test_oc.py
 ```
 - Expected output: q-values and efp scores for the top ranked microRNAs
 
