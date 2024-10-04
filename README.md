@@ -7,9 +7,9 @@ to y. This package includes IPSS for gradient boosting (IPSSGB), random forests 
 models (IPSSL). The final outputs are **efp scores** and **q-values** for each feature in X.
 
 - The **efp score** of feature j is the expected number of false positives, E(FP), selected when j is selected.
-  - So to control the E(FP) at `target_fp`, select the features with efp scores at most `target_fp` 
+  - So to control the E(FP) at `target_fp`, select the features with efp scores at most `target_fp`. 
 - The **q-value** of feature j is the false discovery rate (FDR) when feature j is selected.
-  - So to control the FDR at `target_fdr`, select the features with q-values at most `target_fdr` 
+  - So to control the FDR at `target_fdr`, select the features with q-values at most `target_fdr`. 
 
 ### Key attributes
 - **Error control:** IPSS controls the number of false positives and the FDR.
