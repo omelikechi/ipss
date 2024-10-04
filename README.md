@@ -38,7 +38,7 @@ python3 basic_test.py
 - Expected output: "All tests passed."
 
 **Ovarian cancer: microRNAs and tumor purity** (`oc_mirna_test.py`)
-- Identify microRNAs related to tumor purity in tissue samples from ovarian cancer patients
+- Identify microRNAs related to tumor purity in tumor samples from ovarian cancer patients
 - Data are from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/cancer/ovarian`
 - Inputs:
   - Features: matrix of microRNA expression levels for `p = 585` microRNAs from `n = 451` patients
