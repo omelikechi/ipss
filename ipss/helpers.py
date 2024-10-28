@@ -118,7 +118,7 @@ def score_based_selection(results, n_alphas):
 				results[b,i,j,:] = (results[b,i,j,:] > alpha).astype(int)
 	return results, alphas
 
-def selector_and_args(selector, selector_args):
+def selector_and_args(selector, selector_args, n):
 	selectors = {'gb_classifier':fit_gb_classifier, 'gb_regressor':fit_gb_regressor, 'logistic_regression':fit_l1_classifier,
 		'lasso':fit_l1_regressor, 'rf_classifier':fit_rf_classifier, 'rf_regressor':fit_rf_regressor}
 	if selector in selectors:
@@ -128,7 +128,13 @@ def selector_and_args(selector, selector_args):
 		elif selector in ['gb_classifier', 'gb_regressor'] and not selector_args:
 			selector_args = {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'}
 		elif selector in ['rf_classifier', 'rf_regressor'] and not selector_args:
-			selector_args = {'max_features':1/3, 'n_estimators':100}
+			if n <= 50:
+				n_estimators = 25
+			elif n >= 450:
+				n_estimators = 5
+			else:
+				n_estimators = -(1/20) * x + 55/2
+			selector_args = {'max_features':1/3, 'n_estimators':n_estimators}
 	else:
 		selector_function = selector
 	return selector_function, selector_args
