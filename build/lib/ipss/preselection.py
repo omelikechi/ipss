@@ -7,11 +7,11 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import Lasso, LogisticRegression
 import xgboost as xgb
 
-def preselection(X, y, selector, preselect, preselect_min, preselector_args=None):
+def preselection(X, y, selector, preselect, preselect_min, preselector_args=None, true_features=None):
 	n, p = X.shape
 
 	if p <= preselect_min:
-		return X, np.arange(p)
+		return X, np.arange(p), true_features
 
 	if preselector_args is None:
 		preselector_args = {}
@@ -66,7 +66,13 @@ def preselection(X, y, selector, preselect, preselect_min, preselector_args=None
 
 	X_reduced = X[:, preselect_indices]
 
-	return X_reduced, preselect_indices
+	new_true = []
+	if true_features is not None:
+		for i in range(len(preselect_indices)):
+			if preselect_indices[i] in true_features:
+				new_true.append(i)
+
+	return X_reduced, preselect_indices, new_true
 
 # helper function
 def fit_and_average(model, X, y, n_keep, n_runs, linear_model=False):

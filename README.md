@@ -61,25 +61,19 @@ ipss_output = ipss(X, y)
 # select features based on target number of false positives
 target_fp = 1
 efp_scores = ipss_output['efp_scores']
-selected_features = []
-for feature_index, efp_score in efp_scores:
-  if efp_score <= target_fp:
-    selected_features.append(feature_index)
+selected_features = [feature_index for feature_index, efp_score in efp_scores.items() if efp_score <= target_fp]
 print(f'Selected features (target E(FP) = {target_fp}): {selected_features}')
 
 # select features based on target FDR
 target_fdr = 0.1
 q_values = ipss_output['q_values']
-selected_features = []
-for feature_index, q_value in q_values:
-  if q_value <= target_fdr:
-    selected_features.append(feature_index)
+selected_features = [feature_index for feature_index, q_value in q_values.items() if q_value <= target_fdr]
 print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
 ### Results
 `ipss_output = ipss(X, y)` is a dictionary containing:
-- `efp_scores`: List of tuples `(feature_index, efp_score)` with features ordered by their efp scores from smallest to largest (list of length `p`).
-- `q_values`: List of tuples `(feature_index, q_value)` with features ordered by their q-values from smallest to largest (list of length `p`).
+- `efp_scores`: Dictionary where keys are feature indices and values are their efp scores (dict of length `p`).
+- `q_values`: Dictionary where keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
 - `selected_features`: List of indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)

@@ -3,9 +3,8 @@
 
 import matplotlib.pyplot as plt
 
-from ipss import ipss
-# from load_cancer_data import load_data
-from examples.cancer.load_cancer_data import load_data
+from ipss.main import ipss
+from load_cancer_data import load_data
 
 #--------------------------------
 # Available data options
@@ -30,8 +29,8 @@ For further details about the specific datasets:
 # Load data
 #--------------------------------
 cancer_type = 'ovarian'
-feature_types = ['mirna']
-response = ('clinical', 'Tumor_purity')
+feature_types = ['rnaseq']
+response = ('clinical', 'status')
 
 data = load_data(cancer_type, feature_types, response=response)
 X, y, feature_names = data['X'], data['Y'], data['feature_names']
@@ -47,16 +46,16 @@ ipss_output = ipss(X, y, selector='gb')
 plot_q_values = True
 plot_efp_scores = True
 
-# plot q-values for all features with q-value below a certain threshold
+# plot q-values for all features with q-values below a certain threshold
 if plot_q_values:
 	q_value_threshold = 0.5
 	q_values = ipss_output['q_values']
-	filtered_q_values = {idx: q_value for idx, q_value in q_values.items() if q_value <= q_value_threshold}
-	sorted_q_values = dict(sorted(filtered_q_values.items(), key=lambda x: x[1]))
+	q_values = [(index, q_value) for (index, q_value) in q_values if q_value <= q_value_threshold]
 
 	plt.figure(figsize=(10, 6))
-	plt.bar(range(len(sorted_q_values)), sorted_q_values.values(), color='dodgerblue')
-	plt.xticks(range(len(sorted_q_values)), [feature_names[idx] for idx in sorted_q_values], rotation=45)
+	for i, (feature_index, q_value) in enumerate(q_values):
+		plt.bar(i, q_value, color='dodgerblue')
+	plt.xticks(range(len(q_values)), [feature_names[feature_index] for feature_index, _ in q_values], rotation=45)
 	plt.ylabel('$q$-value', fontsize=18)
 	plt.tight_layout()
 	plt.show()
@@ -65,12 +64,12 @@ if plot_q_values:
 if plot_efp_scores:
 	efp_score_threshold = 5
 	efp_scores = ipss_output['efp_scores']
-	filtered_efp_scores = {idx: efp_score for idx, efp_score in efp_scores.items() if efp_score <= efp_score_threshold}
-	sorted_efp_scores = dict(sorted(filtered_efp_scores.items(), key=lambda x: x[1]))
+	efp_scores = [(index, q_value) for (index, q_value) in efp_scores if q_value <= efp_score_threshold]
 
 	plt.figure(figsize=(10, 6))
-	plt.bar(range(len(sorted_efp_scores)), sorted_efp_scores.values(), color='dodgerblue')
-	plt.xticks(range(len(sorted_efp_scores)), [feature_names[idx] for idx in sorted_efp_scores], rotation=45)
+	for i, (feature_index, efp_score) in enumerate(efp_scores):
+		plt.bar(i, efp_score, color='dodgerblue')
+	plt.xticks(range(len(efp_scores)), [feature_names[feature_index] for feature_index, _ in efp_scores], rotation=45)
 	plt.ylabel('efp score', fontsize=18)
 	plt.tight_layout()
 	plt.show()

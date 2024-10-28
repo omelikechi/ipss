@@ -59,17 +59,17 @@ def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
 	return alphas
 
 def compute_qvalues(efp_scores):
-	T = list(efp_scores.values())
+	T = [efp_score for _, efp_score in efp_scores]
 	fdrs = []
 	for t in T:
-		efp_scores_leq_t = [score for score in efp_scores.values() if score <= t]
+		efp_scores_leq_t = [efp_score for _, efp_score in efp_scores if efp_score <= t]
 		FP = max(efp_scores_leq_t)
 		S = len(efp_scores_leq_t)
 		fdrs.append((t, FP/S))
-	q_values = {
-		feature: min(fdr for t, fdr in fdrs if score <= t)
-		for feature, score in efp_scores.items()
-	}
+	q_values = []
+	for feature, score in efp_scores:
+		q_value = min([fdr for t, fdr in fdrs if score <= t])
+		q_values.append((feature, q_value))
 	return q_values
 
 def integrate(values, alphas, delta=1, cutoff=None):

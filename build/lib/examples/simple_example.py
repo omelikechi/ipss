@@ -56,8 +56,8 @@ print(f'')
 target_fp = 1
 efp_scores = ipss_output['efp_scores']
 selected_features = []
-for feature_index in efp_scores:
-	if efp_scores[feature_index] <= target_fp:
+for feature_index, efp_score in efp_scores:
+	if efp_score <= target_fp:
 		selected_features.append(feature_index)
 tp, fp = count_tp_fp(selected_features, true_features)
 print(f'-------- Target E(FP) = {target_fp} --------')
@@ -70,8 +70,8 @@ print(f'')
 target_fdr = 0.1
 q_values = ipss_output['q_values']
 selected_features = []
-for feature_index in q_values:
-	if q_values[feature_index] <= target_fdr:
+for feature_index, q_value in q_values:
+	if q_value <= target_fdr:
 		selected_features.append(feature_index)
 tp, fp = count_tp_fp(selected_features, true_features)
 print(f'-------- Target FDR = {target_fdr} --------')

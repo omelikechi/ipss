@@ -1,4 +1,4 @@
-# Integrated path stability selection, beta version
+# Integrated path stability selection (IPSS)
 
 import time
 import warnings
@@ -43,6 +43,7 @@ Inputs:
 	delta: determines probability measure mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda
 	standardize_X: whether to standardize features to have mean 0, standard deviation 1
 	center_y: whether to center the response to have mean 0
+	true_features: list of true feature indices when they are known, e.g., in simulation experiments
 	n_jobs: number of jobs to run in parallel
 
 Outputs:
@@ -53,7 +54,7 @@ Outputs:
 	stability_paths: the stability paths for each feature (used for visualization)
 """
 def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function='h3', preselect=0.05, 
-		preselect_min=200, preselector_args=None, cutoff=0.05, delta=1, standardize_X=None, center_y=None, n_jobs=1):
+		preselect_min=200, preselector_args=None, cutoff=0.05, delta=1, standardize_X=None, center_y=None, true_features=None, n_jobs=1):
 
 	# start timer
 	start = time.time()
@@ -82,9 +83,9 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	# preselect features to reduce dimension
 	if preselect:
 		p_full = X.shape[1]
-		X, preselect_indices = preselection(X, y, selector, preselect, preselect_min, preselector_args)
+		X, preselect_indices, new_true = preselection(X, y, selector, preselect, preselect_min, preselector_args, true_features)
 	else:
-		preselect_indices = np.arange(X.shape[1])
+		preselect_indices, new_true = np.arange(X.shape[1]), true_features
 	
 	# dimensions post-preselection
 	n, p = X.shape
@@ -140,16 +141,18 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	# compute feature-specific ipss integral scores and false positive bound
 	scores, integral, alphas, stop_index = ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, delta, cutoff)
 
+	# efp scores
 	efp_scores = np.round(integral / np.maximum(scores, integral / p), decimals=8)
-	efp_scores = dict(zip(preselect_indices, efp_scores))
+	efp_scores = sorted(zip(preselect_indices, efp_scores), key=lambda x: x[1])
 
 	# reinsert features removed during preselection
 	if preselect:
+		kept_features = {efp_score[0] for efp_score in efp_scores}
 		all_features = set(range(p_full))
-		missing_features = all_features - efp_scores.keys()
+		missing_features = all_features - kept_features
 		for feature in missing_features:
-			efp_scores[feature] = p
-		efp_scores = {feature: (p_full if score >= p - 1 else score) for feature, score in efp_scores.items()}
+			efp_scores.append((feature, p))
+		efp_scores = [(feature, p_full if score >= p - 1 else score) for feature, score in efp_scores]
 
 		# reindex stability paths based on original features
 		stability_paths_full = np.zeros((stability_paths.shape[0], p_full))
@@ -163,9 +166,9 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	if not target_fp and not target_fdr:
 		selected_features = []
 	elif target_fp:
-		selected_features = [feature for feature, efp_score in efp_scores.items() if efp_score <= target_fp]
+		selected_features = [feature for feature, score in efp_scores if score <= target_fp]
 	else:
-		selected_features = [feature for feature, q_value in q_values.items() if q_value <= target_fdr]
+		selected_features = [feature for feature, q_value in q_values if q_value <= target_fdr]
 
 	runtime = time.time() - start
 

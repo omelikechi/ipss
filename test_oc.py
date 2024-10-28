@@ -26,9 +26,11 @@ ipss_output = ipss(X,y)
 # print q-values
 q_value_threshold = 0.2
 q_values = ipss_output['q_values']
+sorted_features = sorted(q_values, key=q_values.get)
 print(f'Top ranked microRNA by q-value')
 print(f'--------------------------------')
-for feature_index, q_value in q_values:
+for feature_index in sorted_features:
+	q_value = q_values[feature_index]
 	if q_value <= q_value_threshold:
 		print(f'{feature_names[feature_index]}: {np.round(q_value,5)}')
 
@@ -37,9 +39,11 @@ print(f'')
 # print efp scores
 efp_score_threshold = 1
 efp_scores = ipss_output['efp_scores']
+sorted_features = sorted(efp_scores, key=efp_scores.get)
 print(f'Top ranked microRNA by efp score')
 print(f'----------------------------------')
-for feature_index, efp_score in efp_scores:
+for feature_index in sorted_features:
+	efp_score = efp_scores[feature_index]
 	if efp_score <= efp_score_threshold:
 		print(f'{feature_names[feature_index]}: {np.round(efp_score,2)}')
 
