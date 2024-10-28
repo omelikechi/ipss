@@ -98,7 +98,7 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if selector in ['lasso', 'logistic_regression'] else None
 
 	# selector function and args
-	selector_function, selector_args = selector_and_args(selector, selector_args)
+	selector_function, selector_args = selector_and_args(selector, selector_args, n)
 
 	# estimate selection probabilities
 	results = np.array(Parallel(n_jobs=n_jobs)(delayed(selection)(X, y, alphas, selector_function, **selector_args) for _ in range(B)))
