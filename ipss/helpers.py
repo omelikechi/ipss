@@ -134,7 +134,7 @@ def selector_and_args(selector, selector_args, n):
 				n_estimators = 5
 			else:
 				n_estimators = -(1/20) * n + 55/2
-			selector_args = {'max_features':1/3, 'n_estimators':n_estimators}
+			selector_args = {'max_features':1/3, 'n_estimators':int(n_estimators)}
 	else:
 		selector_function = selector
 	return selector_function, selector_args
