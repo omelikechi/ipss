@@ -61,13 +61,13 @@ ipss_output = ipss(X, y)
 # select features based on target number of false positives
 target_fp = 1
 efp_scores = ipss_output['efp_scores']
-selected_features = [feature_index for feature_index, efp_score in efp_scores.items() if efp_score <= target_fp]
+selected_features = [idx for idx, efp_score in efp_scores.items() if efp_score <= target_fp]
 print(f'Selected features (target E(FP) = {target_fp}): {selected_features}')
 
 # select features based on target FDR
 target_fdr = 0.1
 q_values = ipss_output['q_values']
-selected_features = [feature_index for feature_index, q_value in q_values.items() if q_value <= target_fdr]
+selected_features = [idx for idx, q_value in q_values.items() if q_value <= target_fdr]
 print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
 ### Results
