@@ -98,7 +98,6 @@ def integrate(values, alphas, delta=1, cutoff=None):
 	return output, stop_index
 
 def score_based_selection(results, n_alphas):
-	n_alphas = max(100, n_alphas)	
 	alpha_min = np.min(results)
 	if alpha_min < 0:
 		results += np.abs(alpha_min)

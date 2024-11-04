@@ -23,7 +23,7 @@ def preselection(X, y, selector, preselect, preselect_min, preselector_args=None
 
 	preselect_indices = []
 	if selector == 'logistic_regression':
-		preselector_args = preselector_args or {'penalty': 'l1', 'solver': 'saga', 'tol': 1e-3, 'class_weight': 'balanced'}
+		preselector_args = preselector_args or {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'class_weight':'balanced'}
 		
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0

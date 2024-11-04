@@ -30,7 +30,7 @@ def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
 		y_mean = np.mean(y)
 		scaled_residuals = y - y_mean * (1 - y_mean)
 		alpha_max = 5 / np.max(np.abs(np.dot(X.T, scaled_residuals) / n))
-		selector = LogisticRegression(penalty='l1', solver='saga', tol=1e-3, warm_start=True, class_weight='balanced')
+		selector = LogisticRegression(penalty='l1', solver='liblinear', tol=1e-3, warm_start=True, class_weight='balanced')
 		if np.isnan(alpha_max):
 			alpha_max = 100
 		alpha_min = alpha_max * 1e-10
@@ -123,7 +123,7 @@ def selector_and_args(selector, selector_args, n):
 	if selector in selectors:
 		selector_function = selectors[selector]
 		if selector == 'logistic_regression' and not selector_args:
-			selector_args = {'penalty': 'l1', 'solver': 'saga', 'tol': 1e-3, 'warm_start': True, 'class_weight': 'balanced'}
+			selector_args = {'penalty': 'l1', 'solver':'liblinear', 'tol': 1e-3, 'warm_start': True, 'class_weight': 'balanced'}
 		elif selector in ['gb_classifier', 'gb_regressor'] and not selector_args:
 			selector_args = {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'}
 		elif selector in ['rf_classifier', 'rf_regressor'] and not selector_args:

@@ -94,7 +94,7 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 
 	# alphas
 	if n_alphas is None:
-		n_alphas = 20 if selector in ['lasso', 'logistic_regression'] else 100
+		n_alphas = 15 if selector in ['lasso', 'logistic_regression'] else 100
 	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if selector in ['lasso', 'logistic_regression'] else None
 
 	# selector function and args
