@@ -52,7 +52,7 @@ Outputs:
 	selected_features: the final set of selected features if target_fp or target_fdr is specified
 	stability_paths: the stability paths for each feature (used for visualization)
 """
-def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function='h3', preselect=0.05, 
+def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function=None, preselect=0.05, 
 		preselect_min=200, preselector_args=None, cutoff=0.05, delta=1, standardize_X=None, center_y=None, n_jobs=1):
 
 	# start timer
@@ -90,11 +90,11 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	n, p = X.shape
 	
 	# maximum number of features for l1 regularized selectors (to avoid computational issues)
-	max_features = 0.75 * p if selector in ['lasso', 'logistic_regression'] else None
+	max_features = 0.5 * p if selector in ['lasso', 'logistic_regression'] else None
 
 	# alphas
 	if not n_alphas:
-		n_alphas = 100
+		n_alphas = 15 if selector in ['lasso', 'logistic_regression'] else 100
 	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if selector in ['lasso', 'logistic_regression'] else None
 
 	# selector function and args
@@ -136,6 +136,10 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	stability_paths = stability_paths[:stop_index,:]
 	alphas = alphas[:stop_index]
 	average_selected = average_selected[:stop_index]
+
+	# ipss function
+	if ipss_function is None:
+		ipss_function = 'h2' if selector in ['lasso', 'logistic_regression'] else 'h3'
 
 	# compute feature-specific ipss integral scores and false positive bound
 	scores, integral, alphas, stop_index = ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, delta, cutoff)
