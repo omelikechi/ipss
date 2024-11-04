@@ -31,7 +31,6 @@ def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
 		scaled_residuals = y - y_mean * (1 - y_mean)
 		alpha_max = 5 / np.max(np.abs(np.dot(X.T, scaled_residuals) / n))
 		selector = LogisticRegression(penalty='l1', solver='saga', tol=1e-3, warm_start=True, class_weight='balanced')
-		# selector = LogisticRegression(penalty='l1', max_iter=int(1e6), solver='liblinear', class_weight='balanced')
 		if np.isnan(alpha_max):
 			alpha_max = 100
 		alpha_min = alpha_max * 1e-10
