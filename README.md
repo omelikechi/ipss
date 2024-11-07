@@ -99,8 +99,8 @@ Additional examples are available in the [examples](https://github.com/omelikech
 - `target_fp`: Target number of false positives to control (positive float; default `None`).
 - `target_fdr`: Target false discovery rate (FDR) (positive float; default `None`).
 - `B`: Number of subsampling steps (int; default `100` for IPSSGB, `50` otherwise).
-- `n_alphas`: Number of values in the regularization or threshold grid (int; default `100`).
-- `ipss_function`: Function to apply to selection probabilities (str; default `'h3'`). Options are:
+- `n_alphas`: Number of values in the regularization or threshold grid (int; default `15` if `'l1'` else `100`).
+- `ipss_function`: Function to apply to selection probabilities (str; default `'h2'` for `'l1'` else `'h3'`). Options are:
   - `'h1'`: Linear function, ```h1(x) = 2x - 1 if x >= 0.5 else 0```.
   - `'h2'`: Quadratic function, ```h2(x) = (2x - 1)**2 if x >= 0.5 else 0```.
   - `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
