@@ -126,13 +126,7 @@ def selector_and_args(selector, selector_args, n):
 		elif selector in ['gb_classifier', 'gb_regressor'] and not selector_args:
 			selector_args = {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'}
 		elif selector in ['rf_classifier', 'rf_regressor'] and not selector_args:
-			if n <= 50:
-				n_estimators = 25
-			elif n >= 450:
-				n_estimators = 5
-			else:
-				n_estimators = -(1/20) * n + 55/2
-			selector_args = {'max_features':1/3, 'n_estimators':int(n_estimators)}
+			selector_args = {'max_features':1/10, 'n_estimators':50}
 	else:
 		selector_function = selector
 	return selector_function, selector_args
