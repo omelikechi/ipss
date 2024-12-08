@@ -72,8 +72,8 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
 ### Results
 `ipss_output = ipss(X, y)` is a dictionary containing:
-- `efp_scores`: Dictionary where keys are feature indices and values are their efp scores (dict of length `p`).
-- `q_values`: Dictionary where keys are feature indices and values are their q-values (dict of length `p`).
+- `efp_scores`: Dictionary whose keys are feature indices and values are their efp scores (dict of length `p`).
+- `q_values`: Dictionary whose keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
 - `selected_features`: List of indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
@@ -92,10 +92,13 @@ Additional examples are available in the [examples](https://github.com/omelikech
 
 ### Optional arguments:
 - `selector`: Base algorithm to use (str; default `'gb'`). Options are:
-  - `'gb'`: Gradient boosting with XGBoost.
-  - `'l1'`: L1-regularized linear or logistic regression.
-  - `'rf'`: Random forest with sci-kit learn. 
+  - `'dc'`: Distance correlation (uses dcor)
+  - `'gb'`: Gradient boosting (uses XGBoost).
+  - `'l1'`: L1-regularized linear or logistic regression (uses sci-kit learn).
+  - `'rf'`: Random forest (uses sci-kit learn). 
 - `selector_args`: Arguments for the base algorithm (dict; default `None`).
+- `preselect`: Preselect/filter features prior to subsampling (bool; default `True`).
+- `preselect_args`: Arguments for preselection algorithm (dict; default `None`).
 - `target_fp`: Target number of false positives to control (positive float; default `None`).
 - `target_fdr`: Target false discovery rate (FDR) (positive float; default `None`).
 - `B`: Number of subsampling steps (int; default `100` for IPSSGB, `50` otherwise).
@@ -104,14 +107,10 @@ Additional examples are available in the [examples](https://github.com/omelikech
   - `'h1'`: Linear function, ```h1(x) = 2x - 1 if x >= 0.5 else 0```.
   - `'h2'`: Quadratic function, ```h2(x) = (2x - 1)**2 if x >= 0.5 else 0```.
   - `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
-- `preselect`: Number (if int) or percentage (if float) of features to preselect. `False` for no preselection (default `0.05`).
-- `preselect_min`: Minimum number of features to keep in the preselection step (int; default `200`).
-- `preselect_args`: Arguments for the preselection algorithm (dict; default `None`).
 - `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive float; default `0.05`).
 - `delta`: Defines probability measure; see `Associated papers` (float; default `1`).
 - `standardize_X`: Scale features to have mean 0, standard deviation 1 (bool; default `None`).
 - `center_y`: Center response to have mean 0 (bool; default `None`).
-- `true_features`: List of true feature indices when known, e.g., in simulations (list; default `None`).
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
 
 ### General observations/recommendations:
@@ -120,10 +119,9 @@ Additional examples are available in the [examples](https://github.com/omelikech
 - `target_fp` or `target_fdr` (at most one is specified) are problem specific/left to the user
 - In general, all other parameters should not changed
   - `selector_args` include, e.g., decision tree parameters for tree-based models
-  - Results are robust to `B` provided it is bigger than `25`
-  - Results are robust to `n_alphas` provided it is bigger than `50`
-  - `'h3'` yields the most true positives. `'h2'` is more conservative, and `'h1'` even more so.
-  - Preselection can significantly reduce computation time. Results are robust otherwise.
+  - Results are robust to `B` provided it is greater than `25`
+  - `'h3'` is less conservative than `'h2'` which is less conservative `'h1'`.
+  - Preselection can significantly reduce computation time.
   - Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
   - Results are robust to `delta` provided it is between `0` and `1.5`.
   - Standardization is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.

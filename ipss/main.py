@@ -13,7 +13,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import xgboost as xgb
 
-from .base_selectors import fit_gb_classifier, fit_gb_regressor, fit_l1_classifier, fit_l1_regressor, fit_rf_classifier, fit_rf_regressor
 from .helpers import check_response_type, compute_alphas, compute_qvalues, integrate, score_based_selection, selector_and_args
 from .preselection import preselection
 
@@ -37,7 +36,6 @@ Inputs:
 	n_alphas: number of values in grid of regularization or threshold parameters
 	ipss_function: function to apply to selection probabilities; linear ('h1'), quadratic ('h2'), cubic ('h3')
 	preselect: number (if int) or percentage (if 0 < preselect <= 1) of features to preselect. False for no preselection
-	preselect_min: minimum number of features to keep in preselection step
 	preselect_args: arguments for the preselection algorithm (see function called preselection)
 	cutoff: max value of theoretical integral bound I(Lambda)
 	delta: determines probability measure mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda
@@ -52,8 +50,9 @@ Outputs:
 	selected_features: the final set of selected features if target_fp or target_fdr is specified
 	stability_paths: the stability paths for each feature (used for visualization)
 """
-def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function=None, preselect=0.05, 
-		preselect_min=200, preselector_args=None, cutoff=0.05, delta=1, standardize_X=None, center_y=None, n_jobs=1):
+def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_args=None,
+		target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function=None, cutoff=0.05, delta=1, 
+		standardize_X=None, center_y=None, n_jobs=1):
 
 	# start timer
 	start = time.time()
@@ -80,11 +79,11 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 				y -= np.mean(y)
 
 	# preselect features to reduce dimension
+	p_full = X.shape[1]
 	if preselect:
-		p_full = X.shape[1]
-		X, preselect_indices = preselection(X, y, selector, preselect, preselect_min, preselector_args)
+		X, preselect_indices = preselection(X, y, selector, preselector_args)
 	else:
-		preselect_indices = np.arange(X.shape[1])
+		preselect_indices = np.arange(p_full)
 	
 	# dimensions post-preselection
 	n, p = X.shape
@@ -98,7 +97,7 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if selector in ['lasso', 'logistic_regression'] else None
 
 	# selector function and args
-	selector_function, selector_args = selector_and_args(selector, selector_args, n)
+	selector_function, selector_args = selector_and_args(selector, selector_args)
 
 	# estimate selection probabilities
 	results = np.array(Parallel(n_jobs=n_jobs)(delayed(selection)(X, y, alphas, selector_function, **selector_args) for _ in range(B)))
@@ -148,7 +147,7 @@ def ipss(X, y, selector='gb', selector_args=None, target_fp=None, target_fdr=Non
 	efp_scores = dict(zip(preselect_indices, efp_scores))
 
 	# reinsert features removed during preselection
-	if preselect:
+	if p_full != p:
 		all_features = set(range(p_full))
 		missing_features = all_features - efp_scores.keys()
 		for feature in missing_features:

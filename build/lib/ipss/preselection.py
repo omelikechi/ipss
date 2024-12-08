@@ -52,7 +52,7 @@ def preselection(X, y, selector, preselect, preselect_min, preselector_args=None
 			preselect_indices = fit_and_average(model, X, y, preselect, n_runs, linear_model=True)
 
 	elif selector in ['rf_classifier', 'rf_regressor']:
-		preselector_args = preselector_args or {'max_features':'sqrt', 'n_estimators':100}
+		preselector_args = preselector_args or {'max_features':1/10, 'n_estimators':25}
 		model_class = RandomForestClassifier if selector == 'rf_classifier' else RandomForestRegressor
 		model = model_class(**preselector_args)
 		preselect_indices = fit_and_average(model, X, y, preselect, n_runs)

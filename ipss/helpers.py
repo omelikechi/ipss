@@ -18,7 +18,7 @@ def check_response_type(y, selector):
 		y = np.where(y == minval, 0, 1)
 	if selector == 'l1':
 		selector = 'logistic_regression' if binary_response else 'lasso'
-	if selector == 'rf':
+	elif selector == 'rf':
 		selector = 'rf_classifier' if binary_response else 'rf_regressor'
 	elif selector == 'gb':
 		selector = 'gb_classifier' if binary_response else 'gb_regressor'
@@ -116,7 +116,7 @@ def score_based_selection(results, n_alphas):
 				results[b,i,j,:] = (results[b,i,j,:] > alpha).astype(int)
 	return results, alphas
 
-def selector_and_args(selector, selector_args, n):
+def selector_and_args(selector, selector_args):
 	selectors = {'gb_classifier':fit_gb_classifier, 'gb_regressor':fit_gb_regressor, 'logistic_regression':fit_l1_classifier,
 		'lasso':fit_l1_regressor, 'rf_classifier':fit_rf_classifier, 'rf_regressor':fit_rf_regressor}
 	if selector in selectors:
@@ -127,6 +127,8 @@ def selector_and_args(selector, selector_args, n):
 			selector_args = {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'}
 		elif selector in ['rf_classifier', 'rf_regressor'] and not selector_args:
 			selector_args = {'max_features':1/10, 'n_estimators':50}
+		else:
+			selector_args = {}
 	else:
 		selector_function = selector
 	return selector_function, selector_args
