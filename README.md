@@ -40,14 +40,11 @@ python3 test_basic.py
 **Ovarian cancer: microRNAs and tumor purity** (`test_oc.py`)
 - Identify microRNAs related to tumor purity in tumor samples from ovarian cancer patients
 - Data are from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/cancer/ovarian`
-- Inputs:
-  - Features: matrix of microRNA expression levels for `p = 585` microRNAs from `n = 451` patients
-  - Response: tumor purity (proportion of cancerous cells in a tissue sample) from `n = 451` patients
 - Run the test:
 ```
 python3 test_oc.py
 ```
-- Expected output: q-values and efp scores for the top ranked microRNAs
+- Expected output: q-values and efp scores for top ranked microRNAs
 
 ## Usage
 ```python
@@ -91,7 +88,7 @@ Additional examples are available in the [examples](https://github.com/omelikech
 - `y`: Response (array of shape `(n,)` or `(n, 1)`). `ipss` automatically detects if `y` is continuous or binary.
 
 ### Optional arguments:
-- `selector`: Base algorithm to use (str; default `'gb'`). Options are:
+- `selector`: Base algorithm to use (str; default `'gb'`). Options:
   - `'dc'`: Distance correlation (uses dcor)
   - `'gb'`: Gradient boosting (uses XGBoost).
   - `'l1'`: L1-regularized linear or logistic regression (uses sci-kit learn).
@@ -103,7 +100,7 @@ Additional examples are available in the [examples](https://github.com/omelikech
 - `target_fdr`: Target false discovery rate (FDR) (positive float; default `None`).
 - `B`: Number of subsampling steps (int; default `100` for IPSSGB, `50` otherwise).
 - `n_alphas`: Number of values in the regularization or threshold grid (int; default `15` if `'l1'` else `100`).
-- `ipss_function`: Function to apply to selection probabilities (str; default `'h2'` for `'l1'` else `'h3'`). Options are:
+- `ipss_function`: Function to apply to selection probabilities (str; default `'h2'` if `'l1'` else `'h3'`). Options:
   - `'h1'`: Linear function, ```h1(x) = 2x - 1 if x >= 0.5 else 0```.
   - `'h2'`: Quadratic function, ```h2(x) = (2x - 1)**2 if x >= 0.5 else 0```.
   - `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
