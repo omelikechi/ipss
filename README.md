@@ -89,7 +89,6 @@ Additional examples are available in the [examples](https://github.com/omelikech
 
 ### Optional arguments:
 - `selector`: Base algorithm to use (str; default `'gb'`). Options:
-  - `'dc'`: Distance correlation (uses dcor)
   - `'gb'`: Gradient boosting (uses XGBoost).
   - `'l1'`: L1-regularized linear or logistic regression (uses sci-kit learn).
   - `'rf'`: Random forest (uses sci-kit learn). 
