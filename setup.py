@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name='ipss',
-	version='1.0.13',
+	version='1.0.15',
 	author='Omar Melikechi',
 	author_email='omar.melikechi@gmail.com',
 	packages=find_packages(),

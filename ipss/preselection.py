@@ -12,18 +12,21 @@ def preselection(X, y, selector, preselector_args=None):
 
 	if preselector_args is None:
 		preselector_args = {}
-	n_runs = preselector_args.pop('n_runs', 3)
-	n_keep = preselector_args.pop('n_keep', None)
-	prop_zero = preselector_args.pop('prop_zero', 1)
+
+	preselector_args_local = preselector_args.copy()
+	n_runs = preselector_args_local.pop('n_runs', 3)
+	n_keep = preselector_args_local.pop('n_keep', None)
+	prop_zero = preselector_args_local.pop('prop_zero', 1)
 
 	preselect_indices = []
 
 	if selector in ['lasso', 'logistic_regression']:
 
 		if n_keep is None:
-			# keep features based on correlation; linearly interpolate between (avg_max_cor, n_keep) = (0.75, 100) and (0.95, 25)
+			# n_keep based on correlation; linearly interpolate between (avg_max_cor, n_keep) = (0.75, 100) and (0.95, 25)
 			avg_max_cor = average_max_correlation(X)
 			n_keep = 100 if avg_max_cor <= 3/4 else int(-375 * avg_max_cor + 1525/4)
+		print(f'n_keep = {n_keep}')
 
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0
@@ -34,13 +37,12 @@ def preselection(X, y, selector, preselector_args=None):
 		alpha = max(np.sort(correlations)[::-1][min(p - 1, 2 * n_keep)], 1e-6)
 
 		if selector == 'lasso':
-			preselector_args = preselector_args or {}
-			preselector_args.setdefault('alpha', alpha)
-			model = Lasso(**preselector_args)
+			preselector_args_local.setdefault('alpha', alpha)
+			model = Lasso(**preselector_args_local)
 		else:
-			preselector_args = preselector_args or {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'class_weight':'balanced'}
-			preselector_args.setdefault('C', 1 / alpha)
-			model = LogisticRegression(**preselector_args)
+			preselector_args_local = preselector_args_local or {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'class_weight':'balanced'}
+			preselector_args_local.setdefault('C', 1 / alpha)
+			model = LogisticRegression(**preselector_args_local)
 
 		feature_importances = np.zeros(p)
 		with warnings.catch_warnings():
@@ -53,13 +55,11 @@ def preselection(X, y, selector, preselector_args=None):
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
 
 	elif selector in ['rf_classifier', 'rf_regressor']:
-
-		if n_keep is None:
-			n_keep = 100
-
-		preselector_args = preselector_args or {'max_features':0.1, 'n_estimators':25}
+		n_keep = n_keep or 100
+		preselector_args_local.setdefault('max_features', 0.1)
+		preselector_args_local.setdefault('n_estimators', 25)
 		model_class = RandomForestClassifier if selector == 'rf_classifier' else RandomForestRegressor
-		model = model_class(**preselector_args)
+		model = model_class(**preselector_args_local)
 
 		feature_importances = np.zeros(p)
 		for _ in range(n_runs):
@@ -69,9 +69,12 @@ def preselection(X, y, selector, preselector_args=None):
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
 
 	elif selector in ['gb_classifier', 'gb_regressor']:
-		preselector_args = preselector_args or {'max_depth':1, 'colsample_bynode':0.1, 'n_estimators':25, 'importance_type':'gain'}
+		preselector_args_local.setdefault('max_depth', 1)
+		preselector_args_local.setdefault('colsample_bynode', 0.1)
+		preselector_args_local.setdefault('n_estimators', 25)
+		preselector_args_local.setdefault('importance_type', 'gain')
 		model_class = xgb.XGBClassifier if selector == 'gb_classifier' else xgb.XGBRegressor
-		model = model_class(**preselector_args)
+		model = model_class(**preselector_args_local)
 
 		nonzero_counts = np.zeros(p, dtype=int)
 		for _ in range(n_runs):
