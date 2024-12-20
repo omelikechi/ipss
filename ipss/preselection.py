@@ -26,7 +26,6 @@ def preselection(X, y, selector, preselector_args=None):
 			# n_keep based on correlation; linearly interpolate between (avg_max_cor, n_keep) = (0.75, 100) and (0.95, 25)
 			avg_max_cor = average_max_correlation(X)
 			n_keep = 100 if avg_max_cor <= 3/4 else int(-375 * avg_max_cor + 1525/4)
-		print(f'n_keep = {n_keep}')
 
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0
