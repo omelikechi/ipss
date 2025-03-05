@@ -78,7 +78,7 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ## Examples
 The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder includes
 - **A simple simulation**: `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
-- **Analyze cancer data**: `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer/cancer.ipynb)).
+- **Analyze cancer data**: `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer.ipynb)).
 
 ## Full list of `ipss` arguments
 
