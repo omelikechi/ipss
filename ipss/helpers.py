@@ -57,6 +57,38 @@ def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
 	alphas = np.logspace(np.log10(alpha_max), np.log10(alpha_min), n_alphas)
 	return alphas
 
+def compute_correlation(X):
+	corr_matrix = np.corrcoef(X, rowvar=False)
+	abs_corr_matrix = np.abs(corr_matrix)
+	np.fill_diagonal(abs_corr_matrix, 0)
+	avg_correlation = np.mean(np.mean(abs_corr_matrix, axis=1))
+	max_correlations = np.max(abs_corr_matrix, axis=1)
+	avg_max_correlation = np.mean(max_correlations)
+	return avg_correlation, avg_max_correlation
+
+def compute_delta(X, selector):
+	if selector == 'l1':
+		avg_cor, avg_max = compute_correlation(X)
+		if avg_cor <= 1/20:
+			delta = 1
+		elif avg_cor >= 1/4:
+			delta = 0
+		else:
+			# solve delta = c_0 + c_1 * avg_cor + c_2 * avg_max
+			M = np.array([
+				[1, 1/20, 1/2], 
+				[1, 1/4, 1/2], 
+				[1, 1/20, 1]
+			])
+			deltas = np.array([1, 0, 0])
+			coefs = np.linalg.inv(M) @ deltas
+			m = np.array([1, avg_cor, avg_max])
+			delta = coefs.T @ m
+			delta = max(0, min(1, delta))
+	else:
+		delta = 1
+	return delta
+
 def compute_qvalues(efp_scores):
 	T = list(efp_scores.values())
 	fdrs = []
@@ -83,11 +115,11 @@ def integrate(values, alphas, delta=1, cutoff=None):
 	stop_index = n_alphas
 	before = stop_index
 	if cutoff is None:
-		for i in range(1,n_alphas):
+		for i in range(1, n_alphas):
 			weight = 1 if delta == 1 else alphas[i]**(1-delta)
 			output += normalization * weight * values[i-1]
 	else:
-		for i in range(1,n_alphas):
+		for i in range(1, n_alphas):
 			weight = 1 if delta == 1 else alphas[i]**(1-delta)
 			updated_output = output + normalization * weight * values[i-1]
 			if updated_output > cutoff:

@@ -8,7 +8,7 @@ models (IPSSL). The final outputs are **efp scores** and **q-values** for each f
 
 - The **efp score** of feature j is the expected number of false positives, E(FP), selected when j is selected.
   - So to control the E(FP) at `target_fp`, select the features with efp scores at most `target_fp`. 
-- The **q-value** of feature j is the false discovery rate (FDR) when feature j is selected.
+- The **q-value** of feature j is the smallest false discovery rate (FDR) when feature j is selected.
   - So to control the FDR at `target_fdr`, select the features with q-values at most `target_fdr`. 
 
 ### Key attributes
@@ -39,7 +39,7 @@ python3 test_basic.py
 
 **Ovarian cancer: microRNAs and tumor purity** (`test_oc.py`)
 - Identify microRNAs related to tumor purity in tumor samples from ovarian cancer patients
-- Data are from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/cancer/ovarian`
+- Data are from [LinkedOmics](https://www.linkedomics.org/data_download/TCGA-OV/) and located in `examples/ovarian_data`
 - Run the test:
 ```
 python3 test_oc.py
@@ -76,10 +76,9 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
 
 ## Examples
-Additional examples are available in the [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder. These include
-- A simple example, `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
-- Various simulation experiments, `simulation.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simulation/simulation.ipynb)).
-- IPSS applied to cancer data, `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer/cancer.ipynb)).
+The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder includes
+- **A simple simulation**: `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
+- **Analyze cancer data**: `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer/cancer.ipynb)).
 
 ## Full list of `ipss` arguments
 
@@ -112,14 +111,14 @@ Additional examples are available in the [examples](https://github.com/omelikech
 ### General observations/recommendations:
 - IPSSGB is usually best for capturing nonlinear relationships between features and response
 - IPSSL is usually best for capturing linear relationships between features and response
-- `target_fp` or `target_fdr` (at most one is specified) are problem specific/left to the user
+- Choose either `target_fp` or `target_fdr` (not both) based on problem setup.
 - In general, all other parameters should not changed
   - `selector_args` include, e.g., decision tree parameters for tree-based models
   - Results are robust to `B` provided it is greater than `25`
   - `'h3'` is less conservative than `'h2'` which is less conservative `'h1'`.
   - Preselection can significantly reduce computation time.
   - Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
-  - Results are robust to `delta` provided it is between `0` and `1.5`.
+  - Results are robust to `delta` provided it is between `0` and `1`.
   - Standardization is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
   - Centering `y` is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
 

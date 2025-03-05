@@ -6,10 +6,9 @@ import random
 from ipss import ipss
 import numpy as np
 
-from examples.cancer.load_cancer_data import load_data
+from examples.load_cancer_data import load_data
 
 # set random seed
-random.seed(302)
 np.random.seed(302)
 
 # load data

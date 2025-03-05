@@ -17,7 +17,7 @@ p = 500 # number of features
 n_true = 20 # number of true features
 snr = 2 # signal-to-noise ratio
 
-# generate and standardize features
+# generate standard normal data
 X = np.random.normal(0, 1, size=(n,p))
 
 # randomly select true features
