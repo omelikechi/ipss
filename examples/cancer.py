@@ -12,7 +12,7 @@ from load_cancer_data import load_data
 """
 Available options for the different data types are:
 cancer type: 'ovarian' or 'prostate'
-feature type: 'clinical', 'methylation', 'mirna', 'rnaseq', and/or 'rppa'
+feature type: 'clinical', 'mirna', and/or 'rppa'
 response type: tuple of strings (feature_type, feature_name), where
 	- feature_type is any one of the feature types above
 	- feature_name is any feature name in the specified feature type, e.g., 'Tumor_purity' in 'clinical'
