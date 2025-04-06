@@ -1,9 +1,9 @@
-# Baseline feature selection algorithms for IPSS
+# Base estimators for IPSS
 """
 Baseline selectors based on:
 	- Importance scores from gradient boosting with XGBoost
 	- l1-regularized linear (lasso) or logistic regression
-	- Importance scores from random forests with sci-kit learn
+	- Importance scores from random forests with scikit learn
 """
 
 import warnings

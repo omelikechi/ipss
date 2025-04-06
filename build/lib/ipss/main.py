@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import xgboost as xgb
 
-from .helpers import check_response_type, compute_alphas, compute_qvalues, integrate, score_based_selection, selector_and_args
+from .helpers import check_response_type, compute_alphas, compute_delta, compute_qvalues, integrate, score_based_selection, selector_and_args
 from .preselection import preselection
 
 #--------------------------------
@@ -28,8 +28,8 @@ Inputs:
 
 	Optional
 	----------------
-	selector: base algorithm; gradient boosting ('gb'), l1 regularized ('l1'), or random forest ('rf'')
-	selector_args: arguments for base algorithm
+	selector: gradient boosting ('gb'), l1 regularization ('l1'), or random forest ('rf'')
+	selector_args: arguments for selector
 	target_fp: target number of false positives
 	target_fdr: target false discovery rate
 	B: number of subsampling steps when computing selection probabilities
@@ -51,8 +51,8 @@ Outputs:
 	stability_paths: the stability paths for each feature (used for visualization)
 """
 def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_args=None,
-		target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function=None, cutoff=0.05, delta=1, 
-		standardize_X=None, center_y=None, n_jobs=1):
+		target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function=None, cutoff=0.05, 
+		delta=None, standardize_X=None, center_y=None, n_jobs=1):
 
 	# start timer
 	start = time.time()
@@ -62,6 +62,10 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 
 	# number of subsamples
 	B = B if B is not None else 100 if selector == 'gb' else 50
+
+	# probability measure
+	if delta is None:
+		delta = compute_delta(X, selector)
 
 	# reshape response
 	if len(y.shape) > 1:
@@ -89,11 +93,11 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 	n, p = X.shape
 	
 	# maximum number of features for l1 regularized selectors (to avoid computational issues)
-	max_features = 0.5 * p if selector in ['lasso', 'logistic_regression'] else None
+	max_features = 0.75 * p if selector in ['lasso', 'logistic_regression'] else None
 
 	# alphas
 	if n_alphas is None:
-		n_alphas = 15 if selector in ['lasso', 'logistic_regression'] else 100
+		n_alphas = 25 if selector in ['lasso', 'logistic_regression'] else 100
 	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if selector in ['lasso', 'logistic_regression'] else None
 
 	# selector function and args
@@ -142,6 +146,7 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 
 	# compute feature-specific ipss integral scores and false positive bound
 	scores, integral, alphas, stop_index = ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, delta, cutoff)
+	# scores, integral, alphas, stop_index = ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, mu, delta, cutoff)
 
 	efp_scores = np.round(integral / np.maximum(scores, integral / p), decimals=8)
 	efp_scores = dict(zip(preselect_indices, efp_scores))

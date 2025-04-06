@@ -22,10 +22,7 @@ def preselection(X, y, selector, preselector_args=None):
 
 	if selector in ['lasso', 'logistic_regression']:
 
-		if n_keep is None:
-			# n_keep based on correlation; linearly interpolate between (avg_max_cor, n_keep) = (0.75, 100) and (0.95, 25)
-			avg_max_cor = average_max_correlation(X)
-			n_keep = 100 if avg_max_cor <= 3/4 else int(-375 * avg_max_cor + 1525/4)
+		n_keep = n_keep or 200
 
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0
@@ -93,14 +90,5 @@ def preselection(X, y, selector, preselector_args=None):
 	X_reduced = X[:, preselect_indices]
 
 	return X_reduced, preselect_indices
-
-def average_max_correlation(X):
-	corr_matrix = np.corrcoef(X, rowvar=False)
-	abs_corr_matrix = np.abs(corr_matrix)
-	np.fill_diagonal(abs_corr_matrix, 0)
-	max_correlations = np.max(abs_corr_matrix, axis=1)
-	avg_max_correlation = np.mean(max_correlations)
-	
-	return avg_max_correlation
 
 

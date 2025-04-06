@@ -13,7 +13,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import xgboost as xgb
 
-from .helpers import check_response_type, compute_alphas, compute_delta, compute_qvalues, integrate, score_based_selection, selector_and_args
+from .helpers import (check_response_type, compute_alphas, compute_delta, compute_qvalues, integrate, 
+	return_null_result, score_based_selection, selector_and_args)
 from .preselection import preselection
 
 #--------------------------------
@@ -52,7 +53,7 @@ Outputs:
 """
 def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_args=None,
 		target_fp=None, target_fdr=None, B=None, n_alphas=None, ipss_function=None, cutoff=0.05, 
-		delta=None, standardize_X=None, center_y=None, n_jobs=1):
+		delta=None, standardize_X=None, center_y=None, n_jobs=1, verbose=False):
 
 	# start timer
 	start = time.time()
@@ -63,16 +64,16 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 	# number of subsamples
 	B = B if B is not None else 100 if selector == 'gb' else 50
 
-	# probability measure
-	if delta is None:
-		delta = compute_delta(X, selector)
-
 	# reshape response
 	if len(y.shape) > 1:
 		y = y.ravel()
 	
 	# check response type
 	binary_response, selector = check_response_type(y, selector)
+
+	# probability measure
+	if delta is None:
+		delta = compute_delta(X, selector)
 
 	# standardize and center data if using l1 selectors
 	if selector in ['lasso', 'logistic_regression']:
@@ -86,6 +87,10 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 	p_full = X.shape[1]
 	if preselect:
 		X, preselect_indices = preselection(X, y, selector, preselector_args)
+		if preselect_indices.size == 0:
+			output = return_null_result(p_full)
+			warnings.warn('Preselection step removed all features. Returning null result.', UserWarning)
+			return output
 	else:
 		preselect_indices = np.arange(p_full)
 	

@@ -67,7 +67,7 @@ def compute_correlation(X):
 	return avg_correlation, avg_max_correlation
 
 def compute_delta(X, selector):
-	if selector == 'l1':
+	if selector in ['logistic_regression', 'lasso']:
 		avg_cor, avg_max = compute_correlation(X)
 		if avg_cor <= 1/20:
 			delta = 1
@@ -85,6 +85,10 @@ def compute_delta(X, selector):
 			m = np.array([1, avg_cor, avg_max])
 			delta = coefs.T @ m
 			delta = max(0, min(1, delta))
+	elif selector == 'rf_regressor':
+		delta = 1.5
+	elif selector in ['gb_regressor', 'rf_classifier']:
+		delta = 1.25
 	else:
 		delta = 1
 	return delta
@@ -128,6 +132,11 @@ def integrate(values, alphas, delta=1, cutoff=None):
 			else:
 				output = updated_output
 	return output, stop_index
+
+def return_null_result(p):
+	efp_scores = {j: p for j in range(p)}
+	q_values = {j: 1 for j in range(p)}
+	return {'efp_scores': efp_scores, 'q_values':q_values, 'runtime':-1, 'selected_features':[], 'stability_paths':[]}
 
 def score_based_selection(results, n_alphas):
 	alpha_min = np.min(results)

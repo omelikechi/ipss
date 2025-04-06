@@ -16,14 +16,12 @@ def preselection(X, y, selector, preselector_args=None):
 	preselector_args_local = preselector_args.copy()
 	n_runs = preselector_args_local.pop('n_runs', 3)
 	n_keep = preselector_args_local.pop('n_keep', None)
-	prop_zero = preselector_args_local.pop('prop_zero', 1)
+	expansion_factor = preselector_args_local.pop('expansion_factor', 1.5)
 
 	preselect_indices = []
 
 	if selector in ['lasso', 'logistic_regression']:
-
 		n_keep = n_keep or 200
-
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0
 		X_filtered = X[:, non_zero_std_indices]
@@ -56,7 +54,6 @@ def preselection(X, y, selector, preselector_args=None):
 		preselector_args_local.setdefault('n_estimators', 25)
 		model_class = RandomForestClassifier if selector == 'rf_classifier' else RandomForestRegressor
 		model = model_class(**preselector_args_local)
-
 		feature_importances = np.zeros(p)
 		for _ in range(n_runs):
 			model.set_params(random_state=np.random.randint(1e5))
@@ -67,25 +64,27 @@ def preselection(X, y, selector, preselector_args=None):
 	elif selector in ['gb_classifier', 'gb_regressor']:
 		preselector_args_local.setdefault('max_depth', 1)
 		preselector_args_local.setdefault('colsample_bynode', 0.1)
-		preselector_args_local.setdefault('n_estimators', 25)
+		preselector_args_local.setdefault('n_estimators', 50)
 		preselector_args_local.setdefault('importance_type', 'gain')
 		model_class = xgb.XGBClassifier if selector == 'gb_classifier' else xgb.XGBRegressor
 		model = model_class(**preselector_args_local)
-
-		nonzero_counts = np.zeros(p, dtype=int)
-		for _ in range(n_runs):
+		feature_importances = np.zeros(p)
+		for i in range(n_runs):
 			model.set_params(random_state=np.random.randint(1e5))
-			model.fit(X,y)
-			importances = model.feature_importances_
-			nonzero_counts += (importances > 0).astype(int)
-		preselect_indices = np.where(nonzero_counts != 0)[0]
-
-		if prop_zero > 0:
-			excluded_features = np.setdiff1d(np.arange(p), preselect_indices)
-			n_included = len(preselect_indices)
-			n_null = min(len(excluded_features), int(prop_zero * n_included))
-			reintroduced_features = np.random.choice(excluded_features, size=n_null, replace=False)
-			preselect_indices = np.concatenate((preselect_indices, reintroduced_features))
+			model.fit(X, y)
+			feature_importances += model.feature_importances_
+		nonzero_mask = feature_importances > 0
+		total_nonzero = np.sum(nonzero_mask)
+		n_keep = max(100, min(200, int(expansion_factor * total_nonzero)))
+		nonzero_indices = np.where(nonzero_mask)[0]
+		# randomly sample zero-importance features
+		if len(nonzero_indices) >= n_keep:
+			preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
+		else:
+			n_extra = n_keep - len(nonzero_indices)
+			zero_indices = np.where(~nonzero_mask)[0]
+			extra_indices = np.random.choice(zero_indices, size=n_extra, replace=False)
+			preselect_indices = np.concatenate([nonzero_indices, extra_indices])
 
 	X_reduced = X[:, preselect_indices]
 
