@@ -96,8 +96,8 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 ### General observations/recommendations:
 - IPSSGB is usually best for capturing nonlinear relationships between features and response
 - IPSSL is usually best for capturing linear relationships between features and response
-- For FDR control, it is usually best to run `ipss` to compute q-values and subsequently use the q-values to select features at the desired FDR threshold (as in the Usage section above), rather than specify `target_fdr`, which should be left as `None`. This provides greater flexibility.
-- For E(FP) control, it is usually best to run `ipss` to compute efp scores and subsequently use the efp scores to select features at the desired false positive threshold, rather than specify `target_fp`, which should be left as `None`. This provides greater flexibility.
+- For FDR control, it is usually best to compute q-values with `ipss` and then use them to select features at the desired FDR threshold (as in the Usage section above), rather than specify `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
+- For E(FP) control, it is usually best to compute efp scores with `ipss` and then use them to select features at the desired false positive threshold, rather than specify `target_fp`, which should be left as `None`. This provides greater flexibility when selecting features.
 - In general, all other parameters should not changed
   - `selector_args` include, e.g., decision tree parameters for tree-based models
   - Results are robust to `B` provided it is greater than `25`
