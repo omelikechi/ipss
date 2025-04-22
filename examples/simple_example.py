@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from ipss import ipss
 
 # set random seed
-np.random.seed(1)
+np.random.seed(302)
 
 #--------------------------------
 # Generate data

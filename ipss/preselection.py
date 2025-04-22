@@ -75,7 +75,7 @@ def preselection(X, y, selector, preselector_args=None):
 			feature_importances += model.feature_importances_
 		nonzero_mask = feature_importances > 0
 		total_nonzero = np.sum(nonzero_mask)
-		n_keep = max(100, min(200, int(expansion_factor * total_nonzero)))
+		n_keep = min(p, max(100, int(expansion_factor * total_nonzero)))
 		nonzero_indices = np.where(nonzero_mask)[0]
 		# randomly sample zero-importance features
 		if len(nonzero_indices) >= n_keep:

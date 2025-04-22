@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name='ipss',
-	version='1.0.18',
+	version='1.0.19',
 	author='Omar Melikechi',
 	author_email='omar.melikechi@gmail.com',
 	packages=find_packages(),
@@ -18,7 +18,6 @@ setup(
 	],
 	python_requires='>=3.6',
 	include_package_data=True,
-	data_files=[("", ["test_oc.py", "test_basic.py"])],
 	classifiers=[
 		'Programming Language :: Python :: 3',
 		'License :: OSI Approved :: MIT License',

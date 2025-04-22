@@ -85,9 +85,7 @@ def compute_delta(X, selector):
 			m = np.array([1, avg_cor, avg_max])
 			delta = coefs.T @ m
 			delta = max(0, min(1, delta))
-	elif selector == 'rf_regressor':
-		delta = 1.5
-	elif selector in ['gb_regressor', 'rf_classifier']:
+	elif selector in ['gb_regressor', 'rf_regressor', 'rf_classifier']:
 		delta = 1.25
 	else:
 		delta = 1
