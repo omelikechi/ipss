@@ -30,12 +30,11 @@ pip install ipss
 ```
 
 ## Tests
-**Basic test** (`tests/test.py`)
-- Run the test:
+**Basic test** (see `tests/test.py`)
+- Run the test (Expected output: "All tests passed."):
 ```
 python3 -m tests.test
 ```
-- Expected output: "All tests passed."
 
 ## Usage
 ```python
@@ -53,7 +52,7 @@ selected_features = [idx for idx, q_value in q_values.items() if q_value <= targ
 print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
 ### Results
-`ipss_output = ipss(X, y)` is a dictionary containing:
+`ipss_output = ipss(X,y)` is a dictionary containing:
 - `efp_scores`: Dictionary whose keys are feature indices and values are their efp scores (dict of length `p`).
 - `q_values`: Dictionary whose keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
@@ -68,7 +67,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 ## Full list of `ipss` arguments
 
 ### Required arguments:
-- `X`: Features (array of shape `(n, p)`), where `n` is the number of samples and `p` is the number of features.
+- `X`: Features (array of shape `(n,p)`), where `n` is the number of samples and `p` is the number of features.
 - `y`: Response (array of shape `(n,)` or `(n, 1)`). `ipss` automatically detects if `y` is continuous or binary.
 
 ### Optional arguments:
