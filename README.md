@@ -104,7 +104,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
   - `'h3'` is less conservative than `'h2'` which is less conservative `'h1'`.
   - Preselection can significantly reduce computation time.
   - Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
-  - Results are robust to `delta` provided it is between `0` and `1`.
+  - Results are robust to `delta` provided it is between `0` and `1.5`.
   - Standardization is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
   - Centering `y` is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
 
