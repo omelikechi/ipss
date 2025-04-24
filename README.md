@@ -29,13 +29,6 @@ Install from PyPI:
 pip install ipss
 ```
 
-## Tests
-**Basic test** (see `tests/test.py`)
-- Run the test (Expected output: "All tests passed."):
-```
-python3 -m tests.test
-```
-
 ## Usage
 ```python
 from ipss import ipss
@@ -51,12 +44,12 @@ q_values = ipss_output['q_values']
 selected_features = [idx for idx, q_value in q_values.items() if q_value <= target_fdr]
 print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
-### Results
+### Output
 `ipss_output = ipss(X,y)` is a dictionary containing:
 - `efp_scores`: Dictionary whose keys are feature indices and values are their efp scores (dict of length `p`).
 - `q_values`: Dictionary whose keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
-- `selected_features`: List of indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
+- `selected_features`: Indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
 
 ## Examples

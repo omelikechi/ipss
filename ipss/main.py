@@ -1,4 +1,4 @@
-# Integrated path stability selection, beta version
+# Integrated path stability selection
 
 import time
 import warnings
@@ -190,7 +190,6 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 		'stability_paths': stability_paths
 		}
 
-
 # compute ipss scores and theoretical E(FP) bounds
 def ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, delta, cutoff):
 	n_alphas, p = stability_paths.shape
@@ -234,7 +233,6 @@ def selection(X, y, alphas, selector, **kwargs):
 	indices = np.arange(n)
 	np.random.shuffle(indices)
 	n_split = int(len(indices) / 2)
-
 	if alphas is None:
 		indicators = np.empty((2,p))
 		for half in range(2):

@@ -43,7 +43,7 @@ def count_tp_fp(selected_features, true_features):
 #--------------------------------
 # Run IPSS
 #--------------------------------
-ipss_output = ipss(X, y, selector='l1')
+ipss_output = ipss(X, y, selector='rf')
 
 #--------------------------------
 # Analyze results
@@ -64,7 +64,7 @@ print(f'Number of false positives: {fp}')
 print(f'')
 
 # select features based on target FDR
-target_fdr = 0.1
+target_fdr = 0.2
 q_values = ipss_output['q_values']
 selected_features = [idx for idx, q_value in q_values.items() if q_value <= target_fdr]
 tp, fp = count_tp_fp(selected_features, true_features)

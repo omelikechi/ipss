@@ -13,9 +13,6 @@ def check_response_type(y, selector):
 		print(f"Error: The response variable `y` has only one unique value: {unique_values[0]}.")
 		return None, None
 	binary_response = len(unique_values) == 2
-	if binary_response:
-		minval = np.min(unique_values)
-		y = np.where(y == minval, 0, 1)
 	if selector == 'l1':
 		selector = 'logistic_regression' if binary_response else 'lasso'
 	elif selector == 'rf':
