@@ -86,6 +86,13 @@ def preselection(X, y, selector, preselector_args=None):
 			extra_indices = np.random.choice(zero_indices, size=n_extra, replace=False)
 			preselect_indices = np.concatenate([nonzero_indices, extra_indices])
 
+	else:
+		n_keep = n_keep or 100
+		feature_importances = np.zeros(p)
+		for _ in range(n_runs):
+			feature_importances += selector(X, y, **preselector_args_local)
+		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
+
 	X_reduced = X[:, preselect_indices]
 
 	return X_reduced, preselect_indices

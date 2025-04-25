@@ -29,7 +29,7 @@ Inputs:
 
 	Optional
 	----------------
-	selector: gradient boosting ('gb'), l1 regularization ('l1'), or random forest ('rf'')
+	selector: gradient boosting ('gb'), l1 regularization ('l1'), random forest ('rf''), or a custom selector
 	selector_args: arguments for selector
 	target_fp: target number of false positives
 	target_fdr: target false discovery rate
@@ -60,6 +60,14 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 
 	# empty set for selector args if none specified
 	selector_args = selector_args or {}
+
+	# add selector_args to preselector_args for custom selectors
+	if not isinstance(selector, str):
+		if preselector_args is None:
+			preselector_args = {}
+		for key in selector_args:
+			if key not in preselector_args:
+				preselector_args[key] = selector_args[key]
 
 	# number of subsamples
 	B = B if B is not None else 100 if selector == 'gb' else 50
