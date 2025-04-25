@@ -15,10 +15,10 @@ each feature.
 
 ### Flexible selection
 IPSS applies to a wide range of base feature selection algorithms, including regularized models and any method 
-that computes feature importance scores. This package includes IPSS with three built-in base selection algorithms: 
+that computes feature importance scores. This package includes three built-in base selection algorithms: 
 IPSS for L1-regularized linear models (IPSSL1), IPSS for importance scores from gradient boosting (IPSSGB), and 
-IPSS for importance scores from random forests (IPSSRF). It alsoallows users to seamlessly apply IPSS to custom 
-feature importance scores.
+IPSS for importance scores from random forests (IPSSRF). It also allows users to seamlessly apply IPSS with their own
+customized feature importance scores.
 
 ### Speed
 For example, in simulation studies using real RNA-sequencing data from ovarian cancer patients, IPSSL1, IPSSGB, 
