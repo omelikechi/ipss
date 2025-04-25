@@ -25,11 +25,11 @@ For example, in simulation studies using real RNA-sequencing data from ovarian c
 and IPSSRF all run in under 20 seconds (without parallelization) when `n=500` and `p=5000`.
 
 ### Easy to use
-The only required inputs are the feature matrix `X` and the n-by-1 response vector `y`.
+The only required inputs are the feature matrix `X` and response vector `y`.
 
 ## Associated papers
 
-**IPSS for parametric models:** [https://arxiv.org/abs/2403.15877](https://arxiv.org/abs/2403.15877) <br>
+**IPSS for regularized models:** [https://arxiv.org/abs/2403.15877](https://arxiv.org/abs/2403.15877) <br>
 **IPSS for arbitrary feature importance scores:** [https://arxiv.org/abs/2410.02208v1](https://arxiv.org/abs/2410.02208v1)
 
 ## Installation
