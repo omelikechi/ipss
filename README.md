@@ -13,12 +13,12 @@ each feature.
 - The **efp score** of feature j is the expected number of false positives, E(FP), when j is selected.
 	- So to control the E(FP) at `target_fp`, select the features with efp scores at most `target_fp`. 
 
-### Flexiblility
-IPSS applies to a wide range of base feature selection algorithms, including regularized models, such as 
-lasso, as well as any method that computes feature importance scores. This package includes IPSS with three 
-built-in base selection algorithms: IPSS for L1-regularized linear models (IPSSL1), IPSS for importance 
-scores from gradient boosting (IPSSGB), and IPSS for importance scores from random forests (IPSSRF). It also
-allows users to seamlessly apply IPSS to custom feature importance scores.
+### Flexible selection
+IPSS applies to a wide range of base feature selection algorithms, including regularized models and any method 
+that computes feature importance scores. This package includes IPSS with three built-in base selection algorithms: 
+IPSS for L1-regularized linear models (IPSSL1), IPSS for importance scores from gradient boosting (IPSSGB), and 
+IPSS for importance scores from random forests (IPSSRF). It alsoallows users to seamlessly apply IPSS to custom 
+feature importance scores.
 
 ### Speed
 For example, in simulation studies using real RNA-sequencing data from ovarian cancer patients, IPSSL1, IPSSGB, 
