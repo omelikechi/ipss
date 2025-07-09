@@ -5,11 +5,11 @@
 ## Associated papers
 
 - **Integrated path stability selection**  
-  *Journal of the American Statistical Association*  
-  [arXiv](https://arxiv.org/abs/2403.15877)
+  Accepted in *Journal of the American Statistical Association* and available on [arXiv](https://arxiv.org/abs/2403.15877)
 
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
-  [*Bioinformatics*](https://academic-oup-com.ezp-prod1.hul.harvard.edu/bioinformatics/article/41/5/btaf299/8129569); [arXiv](https://arxiv.org/abs/2410.02208)
+  Published in [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and available on [arXiv](https://arxiv.org/abs/2410.02208)
+
 
 ## Installation
 ```
@@ -45,12 +45,12 @@ Each feature (column of `X`) is assigned:
 - an **efp score**: the minimum expected number of false positives (E(FP)) at which the feature is selected
 
 To select features:
-- **Control FDR** by choosing all features with `q ≤ target_fdr`  
-  _Example: `target_fdr = 0.1` selects features with `q ≤ 0.1`_
-- **Control E(FP)** by choosing all features with `efp ≤ target_fp`  
-  _Example: `target_fp = 3` selects features with `efp ≤ 3`_
+- **Control FDR** by choosing all features with `q_value ≤ target_fdr`  
+  _Example: Selecting features with `q_value ≤ 0.1` controls the FDR at level 0.1_
+- **Control E(FP)** by choosing all features with `efp_score ≤ target_fp`  
+  _Example: Selecting features with `efp_score ≤ 2` controls the E(FP) at level 2_
 
-> ℹ️ For best results, we recommend computing `q_values` or `efp_scores` directly and filtering manually, rather than specifying `target_fdr` or `target_fp` as arguments to `ipss` (see the [General observations](#general-observationsrecommendations) section below).
+> In general, we recommend selecting features using `q_values` or `efp_scores` after running `ipss`, rather than specifying `target_fdr` or `target_fp` as arguments (see [General observations/recommendations](#general-observationsrecommendations)).
 
 ## Usage with custom feature importance scores
 For custom feature importance scores, `selector` must be a function that takes `X` and `y` as inputs (as well as an optional
@@ -81,9 +81,9 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
 
 ## Examples
-The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder includes
-- **A simple simulation**: `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
-- **Analyze cancer data**: `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer.ipynb)).
+The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder includes analyses of
+- **Simulated data**: `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
+- **Cancer data**: `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer.ipynb)).
 
 ## Full list of `ipss` arguments
 
@@ -117,8 +117,8 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 ### General observations/recommendations:
 - IPSSGB is usually best for capturing nonlinear relationships between features and response
 - IPSSL is usually best for capturing linear relationships between features and response
-- For FDR control, it is usually best to compute q-values with `ipss` and then use them to select features at the desired FDR threshold (as in the Usage section above), rather than specify `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
-- For E(FP) control, it is usually best to compute efp scores with `ipss` and then use them to select features at the desired false positive threshold, rather than specify `target_fp`, which should be left as `None`. This provides greater flexibility when selecting features.
+- For FDR control, we generally recommend computing q-values with `ipss` and then using them to select features at the desired FDR threshold (as in the [Usage](#usage) section above), rather than specifying `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
+- For E(FP) control, we generally recommend computing efp scores with `ipss` and then using them to select features at the desired false positive threshold, rather than specifying `target_fp`, which should be left as `None`. This provides greater flexibility when selecting features.
 - In general, all other parameters should not be changed
 	- `selector_args` include, e.g., decision tree parameters for tree-based models
 	- Results are robust to `B` provided it is greater than `25`
