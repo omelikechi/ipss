@@ -1,31 +1,19 @@
-# Integrated Path Stability Selection (IPSS)
+# Integrated path stability selection (IPSS)
 
 > Fast, flexible feature selection with false discovery control
-
-**IPSS** performs supervised feature selection with false discovery control.  
-The only required inputs are:
-- `X`: an `n`-by-`p` data matrix (`n` = number of samples, `p` = number of features)  
-- `y`: an `n`-dimensional response vector
-
-The main outputs are:
-- **q-values** for controlling the false discovery rate (FDR)  
-- **efp scores** for controlling the expected number of false positives (E[FP])
 
 ## Associated Papers
 
 - **Integrated path stability selection**  
-  Omar Melikechi and Jeffrey W. Miller  
-  *Journal of the American Statistical Association (JASA)*, 2025  
-  [arXiv:2403.15877](https://arxiv.org/abs/2403.15877)
+  *Journal of the American Statistical Association*  
+  [arXiv](https://arxiv.org/abs/2403.15877)
 
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
-  Omar Melikechi, David B. Dunson, and Jeffrey W. Miller  
-  *Bioinformatics*, 2025, **41(5)**: btaf299  
+  *Bioinformatics*  
   [Published version](https://academic-oup-com.ezp-prod1.hul.harvard.edu/bioinformatics/article/41/5/btaf299/8129569)  
-  [arXiv:2410.02208](https://arxiv.org/abs/2410.02208)
+  [arXiv](https://arxiv.org/abs/2410.02208)
 
 ## Installation
-Install from PyPI:
 ```
 pip install ipss
 ```
@@ -45,13 +33,24 @@ q_values = ipss_output['q_values']
 selected_features = [idx for idx, q_value in q_values.items() if q_value <= target_fdr]
 print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
-### Output
+### Outputs
 `ipss_output = ipss(X,y)` is a dictionary containing:
 - `efp_scores`: Dictionary whose keys are feature indices and values are their efp scores (dict of length `p`).
 - `q_values`: Dictionary whose keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
 - `selected_features`: Indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
 - `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
+
+### Selecting features
+Each feature (column of `X`) is assigned:
+- a **q-value**: the minimum false discovery rate (FDR) at which the feature is selected
+- an **efp score**: the minimum expected number of false positives (E(FP)) at which the feature is selected
+
+To select features:
+- **Control FDR** by choosing all features with `q ≤ target_fdr`  
+  _Example: `target_fdr = 0.1` selects features with `q ≤ 0.1`_
+- **Control E(FP)** by choosing all features with `efp ≤ target_fp`  
+  _Example: `target_fp = 3` selects features with `efp ≤ 3`_
 
 ## Usage with custom feature importance scores
 For custom feature importance scores, `selector` must be a function that takes `X` and `y` as inputs (as well as an optional
@@ -90,7 +89,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 
 ### Required arguments:
 - `X`: Features (array of shape `(n,p)`), where `n` is the number of samples and `p` is the number of features.
-- `y`: Response (array of shape `(n,)` or `(n, 1)`). `ipss` automatically detects if `y` is continuous or binary.
+- `y`: Response (array of shape `(n,)` or `(n, 1)`). `ipss` automatically detects if `y` is binary.
 
 ### Optional arguments:
 - `selector`: Base algorithm to use (str; default `'gb'`). Options:
