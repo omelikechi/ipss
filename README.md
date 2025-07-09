@@ -2,16 +2,14 @@
 
 > Fast, flexible feature selection with false discovery control
 
-## Associated Papers
+## Associated papers
 
 - **Integrated path stability selection**  
   *Journal of the American Statistical Association*  
   [arXiv](https://arxiv.org/abs/2403.15877)
 
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
-  *Bioinformatics*  
-  [Published version](https://academic-oup-com.ezp-prod1.hul.harvard.edu/bioinformatics/article/41/5/btaf299/8129569)  
-  [arXiv](https://arxiv.org/abs/2410.02208)
+  [*Bioinformatics*](https://academic-oup-com.ezp-prod1.hul.harvard.edu/bioinformatics/article/41/5/btaf299/8129569); [arXiv](https://arxiv.org/abs/2410.02208)
 
 ## Installation
 ```
@@ -51,6 +49,8 @@ To select features:
   _Example: `target_fdr = 0.1` selects features with `q ≤ 0.1`_
 - **Control E(FP)** by choosing all features with `efp ≤ target_fp`  
   _Example: `target_fp = 3` selects features with `efp ≤ 3`_
+
+> ℹ️ For best results, we recommend computing `q_values` or `efp_scores` directly and filtering manually, rather than specifying `target_fdr` or `target_fp` as arguments to `ipss` (see the [General observations](#general-observationsrecommendations) section below).
 
 ## Usage with custom feature importance scores
 For custom feature importance scores, `selector` must be a function that takes `X` and `y` as inputs (as well as an optional
