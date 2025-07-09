@@ -1,36 +1,28 @@
-# Integrated path stability selection (IPSS)
+# Integrated Path Stability Selection (IPSS)
 
-## Fast, flexible feature selection with false discovery control
+> Fast, flexible feature selection with false discovery control
 
-Given an `n`-by-`p` feature matrix `X` (`n` = number of samples, `p` = number of features), and an `n`-dimensional 
-response variable `y`, IPSS applies a base selection algorithm to subsamples of the data to select features 
-(columns of `X`) that are related to the response. The final outputs are **q-values** and **efp scores** for 
-each feature.
+**IPSS** performs supervised feature selection with false discovery control.  
+The only required inputs are:
+- `X`: an `n`-by-`p` data matrix (`n` = number of samples, `p` = number of features)  
+- `y`: an `n`-dimensional response vector
 
-### False discovery control
-- The **q-value** of feature j is the smallest false discovery rate (FDR) when feature j is selected.
-	- So to control the FDR at `target_fdr`, select the features with q-values at most `target_fdr`. 
-- The **efp score** of feature j is the expected number of false positives, E(FP), when j is selected.
-	- So to control the E(FP) at `target_fp`, select the features with efp scores at most `target_fp`. 
+The main outputs are:
+- **q-values** for controlling the false discovery rate (FDR)  
+- **efp scores** for controlling the expected number of false positives (E[FP])
 
-### Flexible selection
-IPSS applies to a wide range of base feature selection algorithms, including regularized models and any method 
-that computes feature importance scores. This package includes three built-in base selection algorithms: 
-IPSS for L1-regularized linear models (IPSSL1), IPSS for importance scores from gradient boosting (IPSSGB), and 
-IPSS for importance scores from random forests (IPSSRF). It also allows users to seamlessly apply IPSS with their own
-customized feature importance scores.
+## Associated Papers
 
-### Speed
-For example, in simulation studies using real RNA-sequencing data from ovarian cancer patients, IPSSL1, IPSSGB, 
-and IPSSRF all run in under 20 seconds (without parallelization) when `n=500` and `p=5000`.
+- **Integrated path stability selection**  
+  Omar Melikechi and Jeffrey W. Miller  
+  *Journal of the American Statistical Association (JASA)*, 2025  
+  [arXiv:2403.15877](https://arxiv.org/abs/2403.15877)
 
-### Easy to use
-The only required inputs are the feature matrix `X` and response vector `y`.
-
-## Associated papers
-
-**IPSS for regularized models:** [https://arxiv.org/abs/2403.15877](https://arxiv.org/abs/2403.15877) <br>
-**IPSS for arbitrary feature importance scores:** [https://arxiv.org/abs/2410.02208v1](https://arxiv.org/abs/2410.02208v1)
+- **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
+  Omar Melikechi, David B. Dunson, and Jeffrey W. Miller  
+  *Bioinformatics*, 2025, **41(5)**: btaf299  
+  [Published version](https://academic-oup-com.ezp-prod1.hul.harvard.edu/bioinformatics/article/41/5/btaf299/8129569)  
+  [arXiv:2410.02208](https://arxiv.org/abs/2410.02208)
 
 ## Installation
 Install from PyPI:
