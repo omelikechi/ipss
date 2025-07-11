@@ -18,6 +18,7 @@ setup(
 	],
 	python_requires='>=3.6',
 	include_package_data=True,
+	license='MIT',
 	classifiers=[
 		'Programming Language :: Python :: 3',
 		'License :: OSI Approved :: MIT License',
