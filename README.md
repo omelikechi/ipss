@@ -5,7 +5,7 @@
 ## Associated papers
 
 - **Integrated path stability selection**  
-  Accepted in *Journal of the American Statistical Association* and available on [arXiv](https://arxiv.org/abs/2403.15877)
+  Published in [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) and available on [arXiv](https://arxiv.org/abs/2403.15877)
 
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
   Published in [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and available on [arXiv](https://arxiv.org/abs/2410.02208)
