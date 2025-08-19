@@ -10,7 +10,7 @@
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
   Published in [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and available on [arXiv](https://arxiv.org/abs/2410.02208)
 
-> "*Integrated path stability selection*" introduces IPSS and applies it to penalized regression models such as lasso, adaptive lasso, the minimax concave penalty (MCP), and the smoothly clipped absolute deviation penalty (SCAD). "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, with a focus on scores from gradient boosting and random forests.
+> "*Integrated path stability selection*" introduces IPSS and applies it to regularized parametric models such as lasso, adaptive lasso, MCP, and SCAD (see `Optional arguments` below). "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, focusing on scores from gradient boosting and random forests.
 
 ## Installation
 ```
