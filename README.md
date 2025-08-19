@@ -5,10 +5,10 @@
 ## Associated papers
 
 - **Integrated path stability selection**  
-  Published in the [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) and available on [arXiv](https://arxiv.org/abs/2403.15877)
+  [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) and on [arXiv](https://arxiv.org/abs/2403.15877)
 
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
-  Published in [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and available on [arXiv](https://arxiv.org/abs/2410.02208)
+  [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and on [arXiv](https://arxiv.org/abs/2410.02208)
 
 > "*Integrated path stability selection*" introduces IPSS and applies it to penalized parametric models such as lasso, adaptive lasso, MCP, and SCAD (see `Optional arguments` below). "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, with a focus on scores from gradient boosting and random forests.
 
