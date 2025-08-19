@@ -5,12 +5,12 @@
 ## Associated papers
 
 - **Integrated path stability selection**  
-  Published in [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) and available on [arXiv](https://arxiv.org/abs/2403.15877)
+  Published in the [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) and available on [arXiv](https://arxiv.org/abs/2403.15877)
 
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
   Published in [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and available on [arXiv](https://arxiv.org/abs/2410.02208)
 
-> "*Integrated path stability selection*" introduces IPSS and applies it to regularized regression models like lasso.  
+> "*Integrated path stability selection*" introduces IPSS and applies it to general regularized regression models such as lasso, adaptive lasso, the minimax concave penalty (MCP), and the smoothly clipped absolute deviation penalty (SCAD).  
 > "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, with a focus on scores from gradient boosting and random forests.
 
 ## Installation
@@ -94,11 +94,17 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 - `y`: Response (array of shape `(n,)` or `(n, 1)`). `ipss` automatically detects if `y` is binary.
 
 ### Optional arguments:
-- `selector`: Base algorithm to use (str; default `'gb'`). Options:
-	- `'gb'`: Gradient boosting (uses XGBoost).
-	- `'l1'`: L1-regularized linear or logistic regression (uses scikit-learn).
-	- `'rf'`: Random forest (uses scikit-learn).
-	- Custom function that computes feature importance scores (see usage example above). 
+- `selector`: Base algorithm to use (str; default `'gb'`).
+	- **Nonparametric methods**
+		- `'gb'`: Gradient boosting (XGBoost).
+		- `'rf'`: Random forest (scikit-learn).
+	- **Penalized regression methods**
+		- `'adaptive_lasso'`: Adaptive lasso (skglm)
+		- `'l1'`: L1-regularized linear or logistic regression (scikit-learn).
+		- `'mcp'`: Minimax concave penalty (skglm).
+		- `'scad'`: Smoothly clipped absolute deviation penalty (skglm).
+	- **Custom**
+		- Users can provide their own feature importance function (see example above). 
 - `selector_args`: Arguments for the base algorithm (dict; default `None`).
 - `preselect`: Preselect/filter features prior to subsampling (bool; default `True`).
 - `preselect_args`: Arguments for preselection algorithm (dict; default `None`).

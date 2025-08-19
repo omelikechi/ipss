@@ -7,7 +7,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import Lasso, LogisticRegression
 import xgboost as xgb
 
-def preselection(X, y, selector, preselector_args=None):
+def preselection(X, y, selector, preselector_args=None, estimator_type='importance'):
 	n, p = X.shape
 
 	if preselector_args is None:
@@ -20,7 +20,7 @@ def preselection(X, y, selector, preselector_args=None):
 
 	preselect_indices = []
 
-	if selector in ['lasso', 'logistic_regression']:
+	if estimator_type == 'regularization':
 		n_keep = n_keep or 200
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0
@@ -30,13 +30,13 @@ def preselection(X, y, selector, preselector_args=None):
 
 		alpha = max(np.sort(correlations)[::-1][min(p - 1, 2 * n_keep)], 1e-6)
 
-		if selector == 'lasso':
-			preselector_args_local.setdefault('alpha', alpha)
-			model = Lasso(**preselector_args_local)
-		else:
+		if selector == 'logistic_regression':
 			preselector_args_local = preselector_args_local or {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'class_weight':'balanced'}
 			preselector_args_local.setdefault('C', 1 / alpha)
 			model = LogisticRegression(**preselector_args_local)
+		else:
+			preselector_args_local.setdefault('alpha', alpha)
+			model = Lasso(**preselector_args_local)
 
 		feature_importances = np.zeros(p)
 		with warnings.catch_warnings():

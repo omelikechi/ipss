@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from sklearn.linear_model import Lasso, LogisticRegression
 
-from .base_selectors import fit_gb_classifier, fit_gb_regressor, fit_l1_classifier, fit_l1_regressor, fit_rf_classifier, fit_rf_regressor
+from .base_selectors import *
 
 def check_response_type(y, selector):
 	unique_values = np.unique(y)
@@ -13,7 +13,9 @@ def check_response_type(y, selector):
 		print(f"Error: The response variable `y` has only one unique value: {unique_values[0]}.")
 		return None, None
 	binary_response = len(unique_values) == 2
-	if selector == 'l1':
+	if selector == 'adaptive_lasso':
+		selector = 'adaptive_lasso_classifier' if binary_response else 'adaptive_lasso_regressor'
+	elif selector == 'l1':
 		selector = 'logistic_regression' if binary_response else 'lasso'
 	elif selector == 'rf':
 		selector = 'rf_classifier' if binary_response else 'rf_regressor'
@@ -82,10 +84,10 @@ def compute_delta(X, selector):
 			m = np.array([1, avg_cor, avg_max])
 			delta = coefs.T @ m
 			delta = max(0, min(1, delta))
-	elif selector in ['gb_regressor', 'rf_regressor', 'rf_classifier']:
-		delta = 1.25
-	else:
+	elif selector in ['gb_classifier', 'adaptive_lasso_regressor', 'adaptive_lasso_classifier']:
 		delta = 1
+	else:
+		delta = 1.25
 	return delta
 
 def compute_qvalues(efp_scores):
@@ -153,8 +155,19 @@ def score_based_selection(results, n_alphas):
 	return results, alphas
 
 def selector_and_args(selector, selector_args):
-	selectors = {'gb_classifier':fit_gb_classifier, 'gb_regressor':fit_gb_regressor, 'logistic_regression':fit_l1_classifier,
-		'lasso':fit_l1_regressor, 'rf_classifier':fit_rf_classifier, 'rf_regressor':fit_rf_regressor}
+	selectors = {
+		'adaptive_lasso_classifier':fit_adaptive_lasso_classifier,
+		'adaptive_lasso_regressor':fit_adaptive_lasso_regressor,
+		'gb_classifier':fit_gb_classifier,
+		'gb_regressor':fit_gb_regressor,
+		'logistic_regression':fit_l1_classifier,
+		'lasso':fit_l1_regressor,
+		'mcp':fit_mcp_regressor,
+		'rf_classifier':fit_rf_classifier,
+		'rf_regressor':fit_rf_regressor,
+		'scad':fit_scad_regressor
+	}
+
 	if selector in selectors:
 		selector_function = selectors[selector]
 		if selector == 'logistic_regression' and not selector_args:

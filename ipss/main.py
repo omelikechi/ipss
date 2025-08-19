@@ -58,6 +58,11 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 	# start timer
 	start = time.time()
 
+	# specify whether base estimator is a regularization or variable importance method
+	estimator_type = 'importance'
+	if selector in ['adaptive_lasso', 'l1', 'mcp', 'scad']:
+		estimator_type = 'regularization'
+
 	# empty set for selector args if none specified
 	selector_args = selector_args or {}
 
@@ -84,7 +89,7 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 		delta = compute_delta(X, selector)
 
 	# standardize and center data if using l1 selectors
-	if selector in ['lasso', 'logistic_regression']:
+	if estimator_type == 'regularization':
 		if standardize_X is None:
 			X = StandardScaler().fit_transform(X)
 		if center_y is None:
@@ -94,7 +99,7 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 	# preselect features to reduce dimension
 	p_full = X.shape[1]
 	if preselect:
-		X, preselect_indices = preselection(X, y, selector, preselector_args)
+		X, preselect_indices = preselection(X, y, selector, preselector_args, estimator_type)
 		if preselect_indices.size == 0:
 			output = return_null_result(p_full)
 			warnings.warn('Preselection step removed all features. Returning null result.', UserWarning)
@@ -106,12 +111,12 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 	n, p = X.shape
 	
 	# maximum number of features for l1 regularized selectors (to avoid computational issues)
-	max_features = 0.75 * p if selector in ['lasso', 'logistic_regression'] else None
+	max_features = 0.75 * p if estimator_type == 'regularization' else None
 
 	# alphas
 	if n_alphas is None:
-		n_alphas = 25 if selector in ['lasso', 'logistic_regression'] else 100
-	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if selector in ['lasso', 'logistic_regression'] else None
+		n_alphas = 25 if estimator_type == 'regularization' else 100
+	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if estimator_type == 'regularization' else None
 
 	# selector function and args
 	selector_function, selector_args = selector_and_args(selector, selector_args)
@@ -159,7 +164,6 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 
 	# compute feature-specific ipss integral scores and false positive bound
 	scores, integral, alphas, stop_index = ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, delta, cutoff)
-	# scores, integral, alphas, stop_index = ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, mu, delta, cutoff)
 
 	efp_scores = np.round(integral / np.maximum(scores, integral / p), decimals=8)
 	efp_scores = dict(zip(preselect_indices, efp_scores))

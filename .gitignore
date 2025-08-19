@@ -1,3 +1,4 @@
 __pycache__/
 ipss.egg-info/
 .DS_Store
+test.py
