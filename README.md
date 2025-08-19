@@ -109,7 +109,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 - `preselect_args`: Arguments for preselection algorithm (dict; default `None`).
 - `target_fp`: Target number of false positives to control (positive float; default `None`).
 - `target_fdr`: Target false discovery rate (FDR) (positive float; default `None`).
-- `B`: Number of subsampling steps (int; default `100` if `selector` is `gb`, `50` otherwise).
+- `B`: Number of subsampling steps (int; default `100` if `selector` is `'gb'`, `50` otherwise).
 - `n_alphas`: Number of values in the regularization or threshold grid (int; default `25` if `'l1'` else `100`).
 - `ipss_function`: Function to apply to selection probabilities (str; default `'h2'` if `'l1'` else `'h3'`). Options:
 	- `'h1'`: Linear function, ```h1(x) = 2x - 1 if x >= 0.5 else 0```.
