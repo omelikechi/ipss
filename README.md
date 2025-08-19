@@ -123,8 +123,8 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
 
 ### General observations/recommendations:
-- IPSSGB is usually best for capturing nonlinear relationships between features and response
-- IPSSL is usually best for capturing linear relationships between features and response
+- `selector = 'gb'` often best for capturing nonlinear relationships
+- `selector = 'l1'` or `'adaptive_lasso'` often best for capturing linear relationships
 - For FDR control, we generally recommend computing q-values with `ipss` and then using them to select features at the desired FDR threshold (as in the [Usage](#usage) section above), rather than specifying `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
 - For E(FP) control, we generally recommend computing efp scores with `ipss` and then using them to select features at the desired false positive threshold, rather than specifying `target_fp`, which should be left as `None`. This provides greater flexibility when selecting features.
 - In general, all other parameters should not be changed
@@ -134,6 +134,6 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 	- Preselection can significantly reduce computation time.
 	- Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
 	- Results are robust to `delta` provided it is between `0` and `1.5`.
-	- Standardization is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
-	- Centering `y` is automatically applied for IPSSL. IPSSGB and IPSSRF are unaffected by this.
+	- Features are automatically standardized for the penalized regression methods.
+	- The response is automatically centered for the penalized regression methods.
 
