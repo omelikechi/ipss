@@ -48,7 +48,7 @@ def preselection(X, y, selector, preselector_args=None, estimator_type='importan
 				feature_importances += np.abs(model.coef_).ravel()
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
 
-	elif selector in ['rf_classifier', 'rf_regressor']:
+	elif selector in ['rf_classifier', 'rf_regressor', 'ufi_classifier', 'ufi_regressor']:
 		n_keep = n_keep or 100
 		preselector_args_local.setdefault('max_features', 0.1)
 		preselector_args_local.setdefault('n_estimators', 25)

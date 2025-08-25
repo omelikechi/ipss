@@ -21,6 +21,8 @@ def check_response_type(y, selector):
 		selector = 'rf_classifier' if binary_response else 'rf_regressor'
 	elif selector == 'gb':
 		selector = 'gb_classifier' if binary_response else 'gb_regressor'
+	elif selector == 'ufi':
+		selector = 'ufi_classifier' if binary_response else 'ufi_regressor'
 	return binary_response, selector
 
 def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
@@ -165,7 +167,9 @@ def selector_and_args(selector, selector_args):
 		'mcp':fit_mcp_regressor,
 		'rf_classifier':fit_rf_classifier,
 		'rf_regressor':fit_rf_regressor,
-		'scad':fit_scad_regressor
+		'scad':fit_scad_regressor,
+		'ufi_classifier':fit_ufi_classifier,
+		'ufi_regressor':fit_ufi_regressor,
 	}
 
 	if selector in selectors:
@@ -177,6 +181,8 @@ def selector_and_args(selector, selector_args):
 			selector_args = {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'}
 		elif selector in ['rf_classifier', 'rf_regressor'] and not selector_args:
 			selector_args = {'max_features':1/10, 'n_estimators':50}
+		elif selector in ['ufi_classifier', 'ufi_regressor'] and not selector_args:
+			selector_args = {'n_estimators':100}
 		else:
 			selector_args = {}
 	else:

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name='ipss',
-	version='1.1.3',
+	version='1.1.4',
 	author='Omar Melikechi',
 	author_email='omar.melikechi@gmail.com',
 	url="https://github.com/omelikechi/ipss",
@@ -14,10 +14,12 @@ setup(
 		'joblib',
 		'numpy',
 		'scikit-learn',
-		'skglm',
 		'xgboost'
 	],
-	extras_require={"plot": ["matplotlib"]},
+	extras_require={
+		"plot": ["matplotlib"],
+		"skglm": ["skglm"]	# install only if user wants SCAD/MCP
+	},
 	python_requires='>=3.6',
 	include_package_data=True,
 	license='MIT',
