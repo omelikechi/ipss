@@ -59,7 +59,7 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 
 	# specify whether base estimator is a regularization or variable importance method
 	estimator_type = 'importance'
-	if selector in ['adaptive_lasso', 'l1', 'mcp', 'scad']:
+	if selector in ['adaptive_lasso', 'l1']: #, 'mcp', 'scad']:
 		estimator_type = 'regularization'
 
 	# empty set for selector args if none specified

@@ -1,10 +1,13 @@
 # Regularized linear models
+"""
+Update (version 1.1.7): SCAD and MCP temporarily disabled due to skglm dependency issues
+"""
 
 import warnings
 
 import numpy as np
-from skglm.estimators import GeneralizedLinearEstimator, MCPRegression
-from skglm.penalties import SCAD
+# from skglm.estimators import GeneralizedLinearEstimator, MCPRegression
+# from skglm.penalties import SCAD
 from sklearn.linear_model import Lasso, lasso_path, LogisticRegression, Ridge, RidgeClassifier
 
 # adaptive lasso classifier
@@ -79,25 +82,25 @@ def fit_l1_regressor(X, y, alphas, **kwargs):
 		coefficients = (coefs.T != 0).astype(int)
 	return coefficients
 
-# minimax concave penalty (MCP)
-def fit_mcp_regressor(X, y, alphas, **kwargs):
-	gamma = kwargs.pop('gamma', 3.0)
-	coefficients = np.zeros((len(alphas), X.shape[1]))
-	for i, alpha in enumerate(alphas):
-		model = MCPRegression(alpha=alpha, gamma=gamma, **kwargs)
-		model.fit(X, y)
-		coefficients[i, :] = (model.coef_ != 0).astype(int)
-	return coefficients
+# # minimax concave penalty (MCP)
+# def fit_mcp_regressor(X, y, alphas, **kwargs):
+# 	gamma = kwargs.pop('gamma', 3.0)
+# 	coefficients = np.zeros((len(alphas), X.shape[1]))
+# 	for i, alpha in enumerate(alphas):
+# 		model = MCPRegression(alpha=alpha, gamma=gamma, **kwargs)
+# 		model.fit(X, y)
+# 		coefficients[i, :] = (model.coef_ != 0).astype(int)
+# 	return coefficients
 
-# smoothly clipped absolute deviation (SCAD)
-def fit_scad_regressor(X, y, alphas, **kwargs):
-	gamma = kwargs.pop('gamma', 3.7)
-	coefficients = np.zeros((len(alphas), X.shape[1]))
-	for i, alpha in enumerate(alphas):
-		penalty = SCAD(alpha=alpha, gamma=gamma, **kwargs)
-		model = GeneralizedLinearEstimator(penalty=penalty)
-		model.fit(X, y)
-		coefficients[i,:] = (model.coef_ != 0).astype(int)
-	return coefficients
+# # smoothly clipped absolute deviation (SCAD)
+# def fit_scad_regressor(X, y, alphas, **kwargs):
+# 	gamma = kwargs.pop('gamma', 3.7)
+# 	coefficients = np.zeros((len(alphas), X.shape[1]))
+# 	for i, alpha in enumerate(alphas):
+# 		penalty = SCAD(alpha=alpha, gamma=gamma, **kwargs)
+# 		model = GeneralizedLinearEstimator(penalty=penalty)
+# 		model.fit(X, y)
+# 		coefficients[i,:] = (model.coef_ != 0).astype(int)
+# 	return coefficients
 
 

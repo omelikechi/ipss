@@ -10,7 +10,7 @@
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
   [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and on [arXiv](https://arxiv.org/abs/2410.02208)
 
-> "*Integrated path stability selection*" introduces IPSS and applies it to penalized parametric models such as lasso, adaptive lasso, MCP, and SCAD (see `Optional arguments` below). "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, with a focus on scores from gradient boosting and random forests.
+> "*Integrated path stability selection*" introduces IPSS and applies it to penalized parametric models such as lasso and adaptive lasso. "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, with a focus on scores from gradient boosting and random forests.
 
 ## Installation
 ```
@@ -98,10 +98,10 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 		- `'gb'`: Gradient boosting (XGBoost).
 		- `'rf'`: Random forest (scikit-learn).
 	- **Penalized regression methods**
-		- `'adaptive_lasso'`: Adaptive lasso (skglm)
+		- `'adaptive_lasso'`: Adaptive lasso (scikit-learn)
 		- `'l1'`: L1-regularized linear or logistic regression (scikit-learn).
-		- `'mcp'`: Minimax concave penalty (skglm).
-		- `'scad'`: Smoothly clipped absolute deviation penalty (skglm).
+		<!-- - `'mcp'`: Minimax concave penalty (skglm). -->
+		<!-- - `'scad'`: Smoothly clipped absolute deviation penalty (skglm). -->
 	- **Custom**
 		- Users can provide their own feature importance function (see example above). 
 - `selector_args`: Arguments for the base algorithm (dict; default `None`).

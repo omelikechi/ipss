@@ -1,6 +1,7 @@
 # Base selectors package
 """
 Expose all base estimator functions so they can be imported directly from ipss.base_selectors.
+Update (version 1.1.7): SCAD and MCP temporarily disabled due to skglm dependency issues
 """
 
 from .linear import (
@@ -8,8 +9,8 @@ from .linear import (
 	fit_l1_classifier,
 	fit_adaptive_lasso_classifier,
 	fit_adaptive_lasso_regressor,
-	fit_mcp_regressor,
-	fit_scad_regressor,
+	# fit_mcp_regressor,
+	# fit_scad_regressor,
 )
 
 from .rf import (
@@ -33,8 +34,8 @@ __all__ = [
 	"fit_l1_classifier",
 	"fit_adaptive_lasso_classifier",
 	"fit_adaptive_lasso_regressor",
-	"fit_mcp_regressor",
-	"fit_scad_regressor",
+	# "fit_mcp_regressor",
+	# "fit_scad_regressor",
 	# random forest
 	"fit_rf_classifier",
 	"fit_rf_regressor",
