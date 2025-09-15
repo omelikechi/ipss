@@ -4,7 +4,6 @@ import time
 import warnings
 
 from joblib import Parallel, delayed
-import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import permutation_importance
