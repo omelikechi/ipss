@@ -1,3 +1,6 @@
 __pycache__/
 ipss.egg-info/
-.DS_Store
+.DS_Storebuild/
+dist/
+*.egg-info/
+ipss/causal_ipss.py

@@ -12,9 +12,9 @@ np.random.seed(302)
 #--------------------------------
 # Generate data
 #--------------------------------
-n = 200 # number of samples
-p = 50 # number of features
-n_true = 10 # number of true features
+n = 250 # number of samples
+p = 500 # number of features
+n_true = 20 # number of true features
 snr = 2 # signal-to-noise ratio
 
 # generate standard normal data
@@ -26,7 +26,7 @@ true_features = np.random.choice(p, size=n_true, replace=False)
 # generate and center response variable y
 beta = np.zeros(p)
 beta[true_features] = np.random.normal(0, 1, size=(n_true))
-signal = np.dot(X,beta)
+signal = X @ beta
 noise = np.sqrt(np.var(signal) / snr)
 y = signal + np.random.normal(0, noise, size=n)
 
@@ -43,7 +43,7 @@ def count_tp_fp(selected_features, true_features):
 #--------------------------------
 # Run IPSS
 #--------------------------------
-ipss_output = ipss(X, y, selector='gb')
+ipss_output = ipss(X, y, selector='rf')
 
 #--------------------------------
 # Analyze results
@@ -55,7 +55,7 @@ print(f'')
 # select features based on target number of false positives
 target_fp = 1
 efp_scores = ipss_output['efp_scores']
-selected_features = [int(idx) for idx, efp_score in efp_scores.items() if efp_score <= target_fp]
+selected_features = [idx for idx, efp_score in efp_scores.items() if efp_score <= target_fp]
 tp, fp = count_tp_fp(selected_features, true_features)
 print(f'-------- Target E(FP) = {target_fp} --------')
 print(f'Selected features: {selected_features}')
@@ -85,8 +85,6 @@ color = ['dodgerblue' if i in true_features else 'gray' for i in range(p)]
 
 for j in range(p):
 	plt.plot(np.arange(n_alphas), stability_paths[:,j], color=color[j])
-plt.xlabel(f'$\\Lambda$', fontsize=18)
-plt.ylabel('Selection probability', fontsize=18)
 plt.tight_layout()
 plt.show()
 

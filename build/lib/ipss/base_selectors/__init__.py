@@ -9,6 +9,8 @@ from .linear import (
 	fit_l1_classifier,
 	fit_adaptive_lasso_classifier,
 	fit_adaptive_lasso_regressor,
+	# fit_mcp_regressor,
+	# fit_scad_regressor,
 )
 
 from .rf import (
@@ -32,6 +34,8 @@ __all__ = [
 	"fit_l1_classifier",
 	"fit_adaptive_lasso_classifier",
 	"fit_adaptive_lasso_regressor",
+	# "fit_mcp_regressor",
+	# "fit_scad_regressor",
 	# random forest
 	"fit_rf_classifier",
 	"fit_rf_regressor",

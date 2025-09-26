@@ -164,8 +164,10 @@ def selector_and_args(selector, selector_args):
 		'gb_regressor':fit_gb_regressor,
 		'logistic_regression':fit_l1_classifier,
 		'lasso':fit_l1_regressor,
+		# 'mcp':fit_mcp_regressor,
 		'rf_classifier':fit_rf_classifier,
 		'rf_regressor':fit_rf_regressor,
+		# 'scad':fit_scad_regressor,
 		'ufi_classifier':fit_ufi_classifier,
 		'ufi_regressor':fit_ufi_regressor,
 	}

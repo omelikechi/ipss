@@ -7,7 +7,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import Lasso, LogisticRegression
 import xgboost as xgb
 
-def preselection(X, y, selector, preselector_args=None, selector_type='importance'):
+def preselection(X, y, selector, preselector_args=None, estimator_type='importance'):
 	n, p = X.shape
 
 	if preselector_args is None:
@@ -20,7 +20,7 @@ def preselection(X, y, selector, preselector_args=None, selector_type='importanc
 
 	preselect_indices = []
 
-	if selector_type == 'regularization':
+	if estimator_type == 'regularization':
 		n_keep = n_keep or 200
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0
