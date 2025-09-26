@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ipss"
+version = "1.1.9"
+description = "Python implementation of integrated path stability selection (IPSS)"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Omar Melikechi", email = "omar.melikechi@gmail.com" }
+]
+requires-python = ">=3.6"
+dependencies = [
+  "joblib",
+  "numpy",
+  "scikit-learn",
+  "xgboost"
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/omelikechi/ipss"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ipss*"]
+
+[tool.setuptools.exclude-package-data]
+"ipss" = ["causal_ipss.py"]
