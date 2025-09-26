@@ -1,6 +1,15 @@
 __pycache__/
-ipss.egg-info/
-.DS_Storebuild/
+*.pyc
+*.pyo
+*.pyd
+
+# OS junk
+.DS_Store
+
+# Build artifacts
+build/
 dist/
 *.egg-info/
+
+# Work in progress files
 ipss/causal_ipss.py
