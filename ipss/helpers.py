@@ -7,23 +7,63 @@ from sklearn.linear_model import Lasso, LogisticRegression
 
 from .base_selectors import *
 
+def check_condition(Z, true_features, average_selected, alphas, delta, m, preselect_indices, p_full):
+	n_alphas, n_steps, p = Z.shape
+	n_blocks = n_steps // (2 * m)
+	usable_steps = n_blocks * (2 * m)
+	if usable_steps < n_steps:
+		Z = Z[:, :usable_steps, :]  # drop incomplete tail
+
+	# compute empirical probabilities
+	prob = np.zeros((n_alphas, p))
+	for a in range(n_alphas):
+		for j in range(p):
+			count = 0
+			for block_start in range(0, usable_steps, 2 * m):
+				block = Z[a, block_start:block_start + 2 * m, j]
+				if np.all(block):
+					count += 1
+			prob[a, j] = count / n_blocks if n_blocks > 0 else 0
+
+	# integrate over alphas for each (retained) feature
+	integral_vals = np.array([integrate(prob[:, j], alphas, delta=delta)[0] for j in range(p)])
+
+	# expand back to the full feature space if preselection was used
+	all_integrals = np.zeros(p_full)
+	all_integrals[preselect_indices] = integral_vals
+	integral_vals = all_integrals
+
+	# null features in the full space
+	null_features = np.setdiff1d(np.arange(p_full), true_features)
+
+	# empirical left-hand side
+	max_null = integral_vals[null_features].max() if len(null_features) > 0 else 0
+
+	# theoretical bound
+	upper_bound = integrate((average_selected / p) ** (2 * m), alphas, delta=delta)[0]
+
+	return integral_vals, max_null, upper_bound
+
+def resolve_selector(selector, binary_response):
+	if selector == 'adaptive_lasso':
+		return 'adaptive_lasso_classifier' if binary_response else 'adaptive_lasso_regressor'
+	elif selector == 'l1':
+		return 'logistic_regression' if binary_response else 'lasso'
+	elif selector == 'rf':
+		return 'rf_classifier' if binary_response else 'rf_regressor'
+	elif selector == 'gb':
+		return 'gb_classifier' if binary_response else 'gb_regressor'
+	elif selector == 'ufi':
+		return 'ufi_classifier' if binary_response else 'ufi_regressor'
+	return selector
+
 def check_response_type(y, selector):
 	unique_values = np.unique(y)
 	if len(unique_values) == 1:
 		print(f"Error: The response variable `y` has only one unique value: {unique_values[0]}.")
 		return None, None
 	binary_response = len(unique_values) == 2
-	if selector == 'adaptive_lasso':
-		selector = 'adaptive_lasso_classifier' if binary_response else 'adaptive_lasso_regressor'
-	elif selector == 'l1':
-		selector = 'logistic_regression' if binary_response else 'lasso'
-	elif selector == 'rf':
-		selector = 'rf_classifier' if binary_response else 'rf_regressor'
-	elif selector == 'gb':
-		selector = 'gb_classifier' if binary_response else 'gb_regressor'
-	elif selector == 'ufi':
-		selector = 'ufi_classifier' if binary_response else 'ufi_regressor'
-	return binary_response, selector
+	return binary_response, resolve_selector(selector, binary_response)
 
 def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
 	n, p = X.shape
@@ -116,7 +156,6 @@ def integrate(values, alphas, delta=1, cutoff=None):
 		normalization = (1 - delta) * (1 - (a/b)**(1/n_alphas)) / (b**(1-delta) - a**(1-delta))
 	output = 0
 	stop_index = n_alphas
-	before = stop_index
 	if cutoff is None:
 		for i in range(1, n_alphas):
 			weight = 1 if delta == 1 else alphas[i]**(1-delta)
@@ -132,10 +171,10 @@ def integrate(values, alphas, delta=1, cutoff=None):
 				output = updated_output
 	return output, stop_index
 
-def return_null_result(p):
+def return_null_result(p, runtime):
 	efp_scores = {j: p for j in range(p)}
 	q_values = {j: 1 for j in range(p)}
-	return {'efp_scores': efp_scores, 'q_values':q_values, 'runtime':-1, 'selected_features':[], 'stability_paths':[]}
+	return {'efp_scores': efp_scores, 'q_values':q_values, 'runtime':runtime, 'selected_features':[], 'stability_paths':[]}
 
 def score_based_selection(results, n_alphas):
 	alpha_min = np.min(results)
@@ -172,17 +211,21 @@ def selector_and_args(selector, selector_args):
 
 	if selector in selectors:
 		selector_function = selectors[selector]
-		if selector == 'logistic_regression' and not selector_args:
+		if selector_args:
+			selector_args = selector_args
+		elif selector == 'logistic_regression':
 			selector_args = {'penalty': 'l1', 'solver':'liblinear', 'tol': 1e-3, 'warm_start': True, 'class_weight': 'balanced'}
 			# selector_args = {'penalty': 'l1', 'solver':'saga', 'tol': 1e-3, 'warm_start': True, 'class_weight': 'balanced'}
-		elif selector in ['gb_classifier', 'gb_regressor'] and not selector_args:
+		elif selector in ['gb_classifier', 'gb_regressor']:
 			selector_args = {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'}
-		elif selector in ['rf_classifier', 'rf_regressor'] and not selector_args:
+		elif selector in ['rf_classifier', 'rf_regressor']:
 			selector_args = {'max_features':1/10, 'n_estimators':50}
-		elif selector in ['ufi_classifier', 'ufi_regressor'] and not selector_args:
+		elif selector in ['ufi_classifier', 'ufi_regressor']:
 			selector_args = {'n_estimators':100}
 		else:
 			selector_args = {}
 	else:
 		selector_function = selector
 	return selector_function, selector_args
+
+

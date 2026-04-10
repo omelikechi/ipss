@@ -5,13 +5,13 @@ import warnings
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-from .helpers import (check_response_type, compute_alphas, compute_delta, compute_qvalues, integrate, 
-	return_null_result, score_based_selection, selector_and_args)
+from .helpers import (check_response_type, compute_alphas, compute_delta, compute_qvalues, integrate,
+	resolve_selector, score_based_selection, selector_and_args)
 from .preselection import preselection
 
 # prepare ipss arguments and data
-def preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args, 
-	B, n_alphas, ipss_function, delta, standardize_X, center_y):
+def preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args,
+	B, n_alphas, ipss_function, delta, standardize_X, center_y, force_regression=False):
 
 	# specify whether base estimator is a regularization or variable importance method
 	selector_type = 'importance'
@@ -37,7 +37,11 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args,
 		y = y.ravel()
 	
 	# check response type
-	binary_response, selector = check_response_type(y, selector)
+	if force_regression:
+		binary_response = False
+		selector = resolve_selector(selector, binary_response)
+	else:
+		binary_response, selector = check_response_type(y, selector)
 
 	# ipss function
 	if ipss_function is None:
@@ -95,7 +99,7 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args,
 
 # postprocess estimated selection probabilities
 def postprocess_ipss(results, alphas, n_alphas, p, p_full, preselect_indices, B, cutoff, delta, 
-	ipss_function, target_fdr, target_fp):
+	ipss_function, target_fdr, target_fp, _return_details=False):
 
 	# score-based selection
 	if alphas is None:
@@ -161,13 +165,17 @@ def postprocess_ipss(results, alphas, n_alphas, p, p_full, preselect_indices, B,
 	else:
 		selected_features = [feature for feature, q_value in q_values.items() if q_value <= target_fdr]
 
-	return { 
-		'efp_scores': efp_scores,
-		'q_values':q_values,
-		'selected_features': selected_features, 
-		'stability_paths': stability_paths
-		}
+	result = {'efp_scores':efp_scores,'q_values':q_values,'selected_features':selected_features,'stability_paths':stability_paths}
 
+	if _return_details:
+		alphas = alphas[:stop_index]
+		average_selected = average_selected[:stop_index]
+		m = 1 if ipss_function == 'h1' else 2 if ipss_function == 'h2' else 3
+		Z = Z[:stop_index,:,:]
+		result.update({'alphas':alphas, 'average_selected':average_selected, 'delta':delta, 'indicators':Z, 
+			'ipss_function_order':m, 'p_full':p_full, 'preselect_indices':preselect_indices})
+
+	return result
 
 # compute ipss scores and theoretical E(FP) bounds
 def ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, delta, cutoff):

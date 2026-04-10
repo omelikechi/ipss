@@ -4,15 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-from ipss import bootstrap_ipss, ipss
+from ipss import ipss
 
 # set random seed
-np.random.seed(32)
+np.random.seed(302)
 
 #--------------------------------
 # Generate data
 #--------------------------------
-n = 500 # number of samples
+n = 100 # number of samples
 p = 200 # number of features
 n_true = 10 # number of true features
 snr = 2 # signal-to-noise ratio
@@ -43,8 +43,7 @@ def count_tp_fp(selected_features, true_features):
 #--------------------------------
 # Run IPSS
 #--------------------------------
-# ipss_output = bootstrap_ipss(X, y, selector='gb')
-ipss_output = ipss(X, y, selector='gb')
+ipss_output = ipss(X, y, selector='l1')
 
 #--------------------------------
 # Analyze results
