@@ -35,6 +35,7 @@ Inputs:
 	standardize_X: whether to standardize features to have mean 0, standard deviation 1
 	center_y: whether to center the response to have mean 0
 	n_jobs: number of jobs to run in parallel
+	force_regression: force ipss to use regression (if False, classification is used if response is binary)
 
 Outputs:
 	efp_scores: efp (expected false positive) score for each feature
