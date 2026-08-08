@@ -38,7 +38,7 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `q_values`: Dictionary whose keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
 - `selected_features`: Indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
-- `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`)
+- `stability_paths`: Estimated selection probabilities at each parameter value (array of shape `(n_alphas, p)`).
 
 ### Selecting features
 Each feature (column of `X`) is assigned:
