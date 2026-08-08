@@ -1,6 +1,6 @@
 # Integrated path stability selection (IPSS)
 
-> Fast, flexible feature selection with false discovery control
+> Stable feature selection with false discovery control
 
 ## Associated papers
 
