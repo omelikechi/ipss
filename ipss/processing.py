@@ -6,11 +6,11 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 from .helpers import (check_response_type, compute_alphas, compute_delta, compute_qvalues, integrate,
-	resolve_selector, score_based_selection, selector_and_args)
+	resolve_preselector, resolve_selector, score_based_selection, selector_and_args)
 from .preselection import preselection
 
 # prepare ipss arguments and data
-def preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args,
+def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, preselector_args,
 	B, n_alphas, ipss_function, delta, standardize_X, center_y, force_regression=False):
 
 	# specify whether base estimator is a regularization or variable importance method
@@ -21,8 +21,9 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args,
 	# empty set for selector args if none specified
 	selector_args = selector_args or {}
 
-	# add selector_args to preselector_args for custom selectors
-	if not isinstance(selector, str):
+	# if no preselector is specified and the selector is a custom callable, the preselector
+	# defaults to reusing that callable, so it shares selector_args unless overridden
+	if preselector is None and not isinstance(selector, str):
 		if preselector_args is None:
 			preselector_args = {}
 		for key in selector_args:
@@ -62,7 +63,8 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args,
 	# preselect features to reduce dimension
 	p_full = X.shape[1]
 	if preselect:
-		X, preselect_indices = preselection(X, y, selector, preselector_args, selector_type)
+		preselector = resolve_preselector(preselector, selector, binary_response)
+		X, preselect_indices = preselection(X, y, preselector, preselector_args)
 		if preselect_indices.size == 0:
 			warnings.warn('Preselection step removed all features. Returning null result.', UserWarning)
 			return None

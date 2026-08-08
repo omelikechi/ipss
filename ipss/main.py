@@ -28,7 +28,10 @@ Inputs:
 	n_alphas: number of values in grid of regularization or threshold parameters
 	ipss_function: function to apply to selection probabilities; linear ('h1'), quadratic ('h2'), cubic ('h3')
 	preselect: number (if int) or percentage (if 0 < preselect <= 1) of features to preselect. False for no preselection
-	preselect_args: arguments for the preselection algorithm (see function called preselection)
+	preselector: preselection method; defaults to 'dcor' (distance correlation) for every selector except 'l1'/'adaptive_lasso',
+		which default to matching selector. Also accepts 'gb', 'rf', 'ufi', 'l1', 'adaptive_lasso', or a custom preselector
+		(see function called preselection)
+	preselector_args: arguments for the preselection algorithm (see function called preselection)
 	cutoff: max value of theoretical integral bound I(Lambda)
 	delta: determines probability measure mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda
 	subsample_size: size of the subsampled datasets
@@ -44,7 +47,7 @@ Outputs:
 	selected_features: the final set of selected features if target_fp or target_fdr is specified
 	stability_paths: the stability paths for each feature (used for visualization)
 """
-def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_args=None,
+def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector=None, preselector_args=None,
 		B=None, n_alphas=None, ipss_function=None, cutoff=0.05, delta=None, subsample_size=None,
 		target_fp=None, target_fdr=None, standardize_X=None, center_y=None, n_jobs=1,
 		force_regression=False, _return_details=False):
@@ -53,7 +56,7 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector_ar
 	start = time.time()
 
 	# prepare ipss arguments and data prior to estimating selection probabilities
-	prep = preprocess_ipss(X, y, selector, selector_args, preselect, preselector_args,
+	prep = preprocess_ipss(X, y, selector, selector_args, preselect, preselector, preselector_args,
 		B, n_alphas, ipss_function, delta, standardize_X, center_y, force_regression)
 
 	if prep is None:

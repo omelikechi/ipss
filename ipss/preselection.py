@@ -7,7 +7,27 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import Lasso, LogisticRegression
 import xgboost as xgb
 
-def preselection(X, y, selector, preselector_args=None, selector_type='importance'):
+# squared distance correlation between response and each feature
+"""
+only ranking of features is required (no bias correction needed), so plain v-statistic suffices
+"""
+def compute_dcor_scores(X, y):
+	p = X.shape[1]
+	b = np.abs(y[:, None] - y[None, :])
+	B = b - b.mean(axis=0, keepdims=True) - b.mean(axis=1, keepdims=True) + b.mean()
+	dvar_y_sqr = np.mean(B * B)
+
+	scores = np.zeros(p)
+	for j in range(p):
+		a = np.abs(X[:, j][:, None] - X[:, j][None, :])
+		A = a - a.mean(axis=0, keepdims=True) - a.mean(axis=1, keepdims=True) + a.mean()
+		dcov_sqr = np.mean(A * B)
+		dvar_x_sqr = np.mean(A * A)
+		denom = dvar_x_sqr * dvar_y_sqr
+		scores[j] = dcov_sqr / np.sqrt(denom) if denom > 0 else 0.0
+	return scores
+
+def preselection(X, y, preselector, preselector_args=None):
 	n, p = X.shape
 
 	if preselector_args is None:
@@ -17,10 +37,11 @@ def preselection(X, y, selector, preselector_args=None, selector_type='importanc
 	n_runs = preselector_args_local.pop('n_runs', 3)
 	n_keep = preselector_args_local.pop('n_keep', None)
 	expansion_factor = preselector_args_local.pop('expansion_factor', 1.5)
+	engine = preselector_args_local.pop('engine', 'numpy')
 
 	preselect_indices = []
 
-	if selector_type == 'regularization':
+	if preselector in ['logistic_regression', 'lasso', 'adaptive_lasso_classifier', 'adaptive_lasso_regressor']:
 		n_keep = n_keep or 200
 		std_devs = np.std(X, axis=0)
 		non_zero_std_indices = std_devs != 0
@@ -30,7 +51,7 @@ def preselection(X, y, selector, preselector_args=None, selector_type='importanc
 
 		alpha = max(np.sort(correlations)[::-1][min(p - 1, 2 * n_keep)], 1e-6)
 
-		if selector == 'logistic_regression':
+		if preselector in ['logistic_regression', 'adaptive_lasso_classifier']:
 			preselector_args_local = preselector_args_local or {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'class_weight':'balanced'}
 			preselector_args_local.setdefault('C', 1 / alpha)
 			model = LogisticRegression(**preselector_args_local)
@@ -48,11 +69,11 @@ def preselection(X, y, selector, preselector_args=None, selector_type='importanc
 				feature_importances += np.abs(model.coef_).ravel()
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
 
-	elif selector in ['rf_classifier', 'rf_regressor', 'ufi_classifier', 'ufi_regressor']:
+	elif preselector in ['rf_classifier', 'rf_regressor', 'ufi_classifier', 'ufi_regressor']:
 		n_keep = n_keep or 100
 		preselector_args_local.setdefault('max_features', 0.1)
 		preselector_args_local.setdefault('n_estimators', 25)
-		model_class = RandomForestClassifier if selector == 'rf_classifier' else RandomForestRegressor
+		model_class = RandomForestClassifier if 'classifier' in preselector else RandomForestRegressor
 		model = model_class(**preselector_args_local)
 		feature_importances = np.zeros(p)
 		for _ in range(n_runs):
@@ -61,12 +82,12 @@ def preselection(X, y, selector, preselector_args=None, selector_type='importanc
 			feature_importances += model.feature_importances_
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
 
-	elif selector in ['gb_classifier', 'gb_regressor']:
+	elif preselector in ['gb_classifier', 'gb_regressor']:
 		preselector_args_local.setdefault('max_depth', 1)
 		preselector_args_local.setdefault('colsample_bynode', 0.1)
 		preselector_args_local.setdefault('n_estimators', 50)
 		preselector_args_local.setdefault('importance_type', 'gain')
-		model_class = xgb.XGBClassifier if selector == 'gb_classifier' else xgb.XGBRegressor
+		model_class = xgb.XGBClassifier if preselector == 'gb_classifier' else xgb.XGBRegressor
 		model = model_class(**preselector_args_local)
 		feature_importances = np.zeros(p)
 		for i in range(n_runs):
@@ -86,12 +107,34 @@ def preselection(X, y, selector, preselector_args=None, selector_type='importanc
 			extra_indices = np.random.choice(zero_indices, size=n_extra, replace=False)
 			preselect_indices = np.concatenate([nonzero_indices, extra_indices])
 
-	else:
-		n_keep = n_keep or 100
+	elif preselector == 'dcor':
+		n_keep = n_keep or 200
+		if engine == 'dcor':
+			try:
+				import dcor
+			except ImportError as e:
+				raise ImportError(
+					"preselector='dcor' with engine='dcor' requires the dcor package. Install it with "
+					"`pip install ipss[dcor]` or `pip install dcor`."
+				) from e
+			feature_importances = np.array([dcor.distance_correlation_sqr(X[:, j], y, method='auto') for j in range(p)])
+		else:
+			feature_importances = compute_dcor_scores(X, y)
+		feature_importances = np.nan_to_num(feature_importances)
+		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
+
+	elif callable(preselector):
+		n_keep = n_keep or 200
 		feature_importances = np.zeros(p)
 		for _ in range(n_runs):
-			feature_importances += selector(X, y, **preselector_args_local)
+			feature_importances += preselector(X, y, **preselector_args_local)
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
+
+	else:
+		raise ValueError(
+			f"Unrecognized preselector: {preselector!r}. Must be one of 'gb', 'rf', 'ufi', 'l1', "
+			"'adaptive_lasso', 'dcor', or a custom callable."
+		)
 
 	X_reduced = X[:, preselect_indices]
 

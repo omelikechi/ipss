@@ -5,10 +5,10 @@
 ## Associated papers
 
 - **Integrated path stability selection**  
-  [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) and on [arXiv](https://arxiv.org/abs/2403.15877)
+  [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) • [arXiv](https://arxiv.org/abs/2403.15877)
 
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
-  [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) and on [arXiv](https://arxiv.org/abs/2410.02208)
+  [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) • [arXiv](https://arxiv.org/abs/2410.02208)
 
 > "*Integrated path stability selection*" introduces IPSS and applies it to penalized parametric models such as lasso and adaptive lasso. "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, with a focus on scores from gradient boosting and random forests.
 
@@ -106,7 +106,17 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 		- Users can provide their own feature importance function (see example above). 
 - `selector_args`: Arguments for the base algorithm (dict; default `None`).
 - `preselect`: Preselect/filter features prior to subsampling (bool; default `True`).
-- `preselect_args`: Arguments for preselection algorithm (dict; default `None`).
+- `preselector`: Method used to preselect features (default `None`, which resolves to `'dcor'` for every `selector` except `'l1'`/`'adaptive_lasso'`, which use their own linear preselection; a custom `selector` function defaults to reusing itself as the preselector). Options:
+	- `'gb'`: Gradient boosting (XGBoost) feature importances.
+	- `'rf'`: Random forest (scikit-learn) feature importances.
+	- `'l1'` or `'adaptive_lasso'`: (Adaptive) lasso/logistic regression coefficients.
+	- `'dcor'`: Distance correlation between each feature and the response. Captures nonlinear relationships and is fast and deterministic.
+	- Custom: a function `preselector(X, y, **preselector_args) -> array of length p` giving a feature importance score per feature; the top-scoring features (see `n_keep` below) are kept.
+- `preselector_args`: Arguments for the preselection algorithm (dict; default `None`). Recognized keys:
+	- `n_runs`: Number of times to refit the preselector, averaging feature importances across runs (int; default `3`; ignored by `'dcor'`, which is deterministic).
+	- `n_keep`: Number of features to keep (int; defaults depend on `preselector`).
+	- `expansion_factor`: For `'gb'` only, multiplies the number of features with nonzero importance to set `n_keep` (float; default `1.5`).
+	- `engine`: For `'dcor'` only (str; default `'numpy'`). `'numpy'` computes distance correlation from scratch in `O(n^2)`. `'dcor'` instead uses the `dcor` package's faster `O(n log n)` algorithm, which scales better for large `n` but requires installing the `dcor` extra (`pip install ipss[dcor]` or `pip install dcor`).
 - `target_fp`: Target number of false positives to control (positive float; default `None`).
 - `target_fdr`: Target false discovery rate (FDR) (positive float; default `None`).
 - `B`: Number of subsampling steps (int; default `100` if `selector` is `'gb'`, `50` otherwise).
@@ -124,6 +134,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 ### General observations/recommendations:
 - `selector = 'gb'` often best for capturing nonlinear relationships
 - `selector = 'l1'` or `'adaptive_lasso'` often best for capturing linear relationships
+- `preselector = 'dcor'` (the default for every `selector` except `'l1'`/`'adaptive_lasso'`) captures nonlinear relationships, is fast, and, unlike the model-based preselectors (`'gb'`, `'rf'`, `'ufi'`), is deterministic, so results no longer vary across random seeds due to preselection alone
 - For FDR control, we generally recommend computing q-values with `ipss` and then using them to select features at the desired FDR threshold (as in the [Usage](#usage) section above), rather than specifying `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
 - For E(FP) control, we generally recommend computing efp scores with `ipss` and then using them to select features at the desired false positive threshold, rather than specifying `target_fp`, which should be left as `None`. This provides greater flexibility when selecting features.
 - In general, all other parameters should not be changed
