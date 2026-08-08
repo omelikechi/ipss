@@ -9,7 +9,7 @@ import xgboost as xgb
 
 # squared distance correlation between response and each feature
 """
-only ranking of features is required (no bias correction needed), so plain v-statistic suffices
+"Measuring and testing dependence by correlation of distances" by Szekely et al (Annals of Statistics, 2007)
 """
 def compute_dcor_scores(X, y):
 	p = X.shape[1]

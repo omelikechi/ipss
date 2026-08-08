@@ -10,7 +10,7 @@
 - **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
   [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) • [arXiv](https://arxiv.org/abs/2410.02208)
 
-> "*Integrated path stability selection*" introduces IPSS and applies it to penalized parametric models such as lasso and adaptive lasso. "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, with a focus on scores from gradient boosting and random forests.
+> "*Integrated path stability selection*" introduces IPSS and applies it to regularized models such as lasso and adaptive lasso. "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, such as those from gradient boosting and random forests.
 
 ## Installation
 ```
@@ -50,8 +50,6 @@ To select features:
   _Example: Selecting features with `q_value ≤ 0.1` controls the FDR at level 0.1_
 - **Control E(FP)** by choosing all features with `efp_score ≤ target_fp`  
   _Example: Selecting features with `efp_score ≤ 2` controls the E(FP) at level 2_
-
-> In general, we recommend selecting features using `q_values` or `efp_scores` after running `ipss`, rather than specifying `target_fdr` or `target_fp` as arguments (see [General observations/recommendations](#general-observationsrecommendations)).
 
 ## Usage with custom feature importance scores
 For custom feature importance scores, `selector` must be a function that takes `X` and `y` as inputs (as well as an optional
@@ -110,7 +108,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 	- `'gb'`: Gradient boosting (XGBoost) feature importances.
 	- `'rf'`: Random forest (scikit-learn) feature importances.
 	- `'l1'` or `'adaptive_lasso'`: (Adaptive) lasso/logistic regression coefficients.
-	- `'dcor'`: Distance correlation between each feature and the response. Captures nonlinear relationships and is fast and deterministic.
+	- `'dcor'`: Distance correlation. Captures nonlinear relationships and is fast and deterministic.
 	- Custom: a function `preselector(X, y, **preselector_args) -> array of length p` giving a feature importance score per feature; the top-scoring features (see `n_keep` below) are kept.
 - `preselector_args`: Arguments for the preselection algorithm (dict; default `None`). Recognized keys:
 	- `n_runs`: Number of times to refit the preselector, averaging feature importances across runs (int; default `3`; ignored by `'dcor'`, which is deterministic).
@@ -132,18 +130,17 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
 
 ### General observations/recommendations:
-- `selector = 'gb'` often best for capturing nonlinear relationships
-- `selector = 'l1'` or `'adaptive_lasso'` often best for capturing linear relationships
-- `preselector = 'dcor'` (the default for every `selector` except `'l1'`/`'adaptive_lasso'`) captures nonlinear relationships, is fast, and, unlike the model-based preselectors (`'gb'`, `'rf'`, `'ufi'`), is deterministic, so results no longer vary across random seeds due to preselection alone
-- For FDR control, we generally recommend computing q-values with `ipss` and then using them to select features at the desired FDR threshold (as in the [Usage](#usage) section above), rather than specifying `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
+- `selector = 'gb'` often best for capturing nonlinear relationships.
+- `selector = 'l1'` or `'adaptive_lasso'` often best for capturing linear relationships.
+- `preselector = 'dcor'` (the default for every `selector` except `'l1'`/`'adaptive_lasso'`) captures nonlinearities and, unlike the model-based preselectors (`'gb'`, `'rf'`, `'ufi'`), is deterministic.
+- For FDR control, we generally recommend computing q-values with `ipss` and then using them to select features at the desired FDR threshold, rather than specifying `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
 - For E(FP) control, we generally recommend computing efp scores with `ipss` and then using them to select features at the desired false positive threshold, rather than specifying `target_fp`, which should be left as `None`. This provides greater flexibility when selecting features.
 - In general, all other parameters should not be changed
 	- `selector_args` include, e.g., decision tree parameters for tree-based models
 	- Results are robust to `B` provided it is greater than `25`
 	- `'h3'` is less conservative than `'h2'` which is less conservative than `'h1'`.
-	- Preselection can significantly reduce computation time.
+	- Preselection can significantly reduce computation time and increase power.
 	- Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
-	- Results are robust to `delta` provided it is between `0` and `1.5`.
 	- Features are automatically standardized for the penalized regression methods.
-	- The response is automatically centered for the penalized regression methods.
+	- The response is automatically centered for the regularized regression methods.
 
