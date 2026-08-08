@@ -19,16 +19,14 @@ dependencies = [
 	"scikit-learn",
 	"xgboost"
 ]
-
-[project.optional-dependencies]
-dcor = ["dcor"]
-
 classifiers = [
 	"Programming Language :: Python :: 3",
 	"Operating System :: OS Independent",
 ]
-
 keywords = ["feature selection", "variable selection", "stability selection", "machine learning", "statistics"]
+
+[project.optional-dependencies]
+dcor = ["dcor"]
 
 [project.urls]
 Homepage = "https://github.com/omelikechi/ipss"
