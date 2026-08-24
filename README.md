@@ -1,16 +1,14 @@
 # Integrated path stability selection (IPSS)
 
-> Stable feature selection with false discovery control
+> Fast, flexible feature selection with false discovery control
 
-## Associated papers
+## Papers
 
 - **Integrated path stability selection**  
   [*Journal of the American Statistical Association*](https://doi.org/10.1080/01621459.2025.2525589) • [arXiv](https://arxiv.org/abs/2403.15877)
 
-- **Nonparametric IPSS: Fast, flexible feature selection with false discovery control**  
+- **Nonparametric IPSS**  
   [*Bioinformatics*](https://doi.org/10.1093/bioinformatics/btaf299) • [arXiv](https://arxiv.org/abs/2410.02208)
-
-> "*Integrated path stability selection*" introduces IPSS and applies it to regularized models such as lasso and adaptive lasso. "*Nonparametric IPSS: Fast, flexible feature selection with false discovery control*" extends IPSS to arbitrary feature importance scores, such as those from gradient boosting and random forests.
 
 ## Installation
 ```
@@ -30,6 +28,7 @@ ipss_output = ipss(X,y)
 target_fdr = 0.1
 q_values = ipss_output['q_values']
 selected_features = [idx for idx, q_value in q_values.items() if q_value <= target_fdr]
+
 print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 ```
 ### Outputs
