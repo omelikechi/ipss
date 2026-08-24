@@ -21,15 +21,6 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 	# empty set for selector args if none specified
 	selector_args = selector_args or {}
 
-	# if no preselector is specified and the selector is a custom callable, the preselector
-	# defaults to reusing that callable, so it shares selector_args unless overridden
-	if preselector is None and not isinstance(selector, str):
-		if preselector_args is None:
-			preselector_args = {}
-		for key in selector_args:
-			if key not in preselector_args:
-				preselector_args[key] = selector_args[key]
-
 	# number of subsamples
 	B = B if B is not None else 100 if selector == 'gb' else 50
 
@@ -215,5 +206,4 @@ def ipss_scores(stability_paths, B, alphas, average_selected, ipss_function, del
 		scores[i], _ = integrate(values, alphas_stop, delta)
 
 	return scores, integral, alphas, stop_index
-
 

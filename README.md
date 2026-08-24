@@ -103,7 +103,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 		- Users can provide their own feature importance function (see example above). 
 - `selector_args`: Arguments for the base algorithm (dict; default `None`).
 - `preselect`: Preselect/filter features prior to subsampling (bool; default `True`).
-- `preselector`: Method used to preselect features (default `None`, which resolves to `'dcor'` for every `selector` except `'l1'`/`'adaptive_lasso'`, which use their own linear preselection; a custom `selector` function defaults to reusing itself as the preselector). Options:
+- `preselector`: Method used to preselect features (default `None`, which resolves to `'dcor'` for every `selector` except `'l1'`/`'adaptive_lasso'`, which use their own linear preselection). Options:
 	- `'gb'`: Gradient boosting (XGBoost) feature importances.
 	- `'rf'`: Random forest (scikit-learn) feature importances.
 	- `'l1'` or `'adaptive_lasso'`: (Adaptive) lasso/logistic regression coefficients.
@@ -142,4 +142,3 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 	- Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
 	- Features are automatically standardized for the penalized regression methods.
 	- The response is automatically centered for the regularized regression methods.
-

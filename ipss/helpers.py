@@ -58,13 +58,12 @@ def resolve_selector(selector, binary_response):
 	return selector
 
 def resolve_preselector(preselector, selector, binary_response):
-	# default: dcor for every selector except (adaptive) lasso, which keeps its own linear
-	# preselection; custom (callable) selectors default to reusing themselves as the preselector
+	# default: dcor for every selector except (adaptive) lasso, which keeps its own linear preselection
 	if preselector is None:
 		regularization_selectors = ('lasso', 'logistic_regression', 'adaptive_lasso_classifier', 'adaptive_lasso_regressor')
-		if isinstance(selector, str) and selector not in regularization_selectors:
-			return 'dcor'
-		return selector
+		if selector in regularization_selectors:
+			return selector
+		return 'dcor'
 	if not isinstance(preselector, str):
 		return preselector
 	if preselector == 'adaptive_lasso':
@@ -249,5 +248,4 @@ def selector_and_args(selector, selector_args):
 	else:
 		selector_function = selector
 	return selector_function, selector_args
-
 
