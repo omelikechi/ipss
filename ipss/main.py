@@ -35,8 +35,8 @@ Inputs:
 	cutoff: max value of theoretical integral bound I(Lambda)
 	delta: determines probability measure mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda
 	subsample_size: size of the subsampled datasets
-	standardize_X: whether to standardize features to have mean 0, standard deviation 1
-	center_y: whether to center the response to have mean 0
+	standardize_X: whether to standardize features to have mean 0, standard deviation 1 (None: only for 'l1' and 'adaptive_lasso')
+	center_y: whether to center the response to have mean 0 (None: only for 'l1' and 'adaptive_lasso'; binary responses are never centered)
 	n_jobs: number of jobs to run in parallel
 	force_regression: force ipss to use regression (if False, classification is used if response is binary)
 
@@ -61,7 +61,7 @@ def ipss(X, y, selector='gb', selector_args=None, preselect=True, preselector=No
 
 	if prep is None:
 		runtime = time.time() - start
-		return return_null_result(X.shape[1], runtime)
+		return return_null_result(np.shape(X)[1], runtime)
 
 	X, y = prep['X'], prep['y']
 	selector_function, selector_args = prep['selector_function'], prep['selector_args']

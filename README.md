@@ -124,8 +124,8 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 	- `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
 - `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive float; default `0.05`).
 - `delta`: Defines probability measure; see `Associated papers` (float; defaults depend on `selector`).
-- `standardize_X`: Scale features to have mean 0, standard deviation 1 (bool; default `None`).
-- `center_y`: Center response to have mean 0 (bool; default `None`).
+- `standardize_X`: Scale features to have mean 0, standard deviation 1 (bool; default `None`, which standardizes for `'l1'` and `'adaptive_lasso'` only).
+- `center_y`: Center response to have mean 0 (bool; default `None`, which centers for `'l1'` and `'adaptive_lasso'` only). Binary responses are never centered.
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
 
 ### General observations/recommendations:

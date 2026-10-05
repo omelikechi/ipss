@@ -79,11 +79,7 @@ def resolve_preselector(preselector, selector, binary_response):
 	return preselector
 
 def check_response_type(y, selector):
-	unique_values = np.unique(y)
-	if len(unique_values) == 1:
-		print(f"Error: The response variable `y` has only one unique value: {unique_values[0]}.")
-		return None, None
-	binary_response = len(unique_values) == 2
+	binary_response = len(np.unique(y)) == 2
 	return binary_response, resolve_selector(selector, binary_response)
 
 def compute_alphas(X, y, n_alphas, max_features, binary_response=False):

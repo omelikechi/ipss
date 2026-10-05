@@ -3,6 +3,7 @@
 import warnings
 
 import numpy as np
+from scipy.sparse import issparse
 from sklearn.preprocessing import StandardScaler
 
 from .base_selectors import adaptive_weights
@@ -13,6 +14,12 @@ from .preselection import preselection
 # prepare ipss arguments and data
 def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, preselector_args,
 	B, n_alphas, ipss_function, delta, standardize_X, center_y, force_regression=False):
+
+	# cast to float64 (float32 alpha grids underflow/overflow in integrate)
+	X = X.astype(np.float64) if issparse(X) else np.asarray(X, dtype=np.float64)
+	y = np.asarray(y)
+	if y.dtype.kind in 'biuf':
+		y = y.astype(np.float64)
 
 	# specify whether base estimator is a regularization or variable importance method
 	selector_type = 'importance'
@@ -30,6 +37,8 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 		y = y.ravel()
 	
 	# check response type
+	if np.unique(y).size == 1:
+		raise ValueError(f'The response y has only one unique value: {y[0]}.')
 	if force_regression:
 		binary_response = False
 		selector = resolve_selector(selector, binary_response)
@@ -44,13 +53,15 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 	if delta is None:
 		delta = compute_delta(X, selector)
 
-	# standardize and center data if using l1 selectors
-	if selector_type == 'regularization':
-		if standardize_X is None:
-			X = StandardScaler().fit_transform(X)
-		if center_y is None:
-			if not binary_response:
-				y -= np.mean(y)
+	# standardize and center data (by default only for l1 selectors); never center a binary response
+	if standardize_X is None:
+		standardize_X = selector_type == 'regularization'
+	if center_y is None:
+		center_y = selector_type == 'regularization'
+	if standardize_X:
+		X = StandardScaler().fit_transform(X)
+	if center_y and not binary_response:
+		y = y - np.mean(y)
 
 	# preselect features to reduce dimension
 	p_full = X.shape[1]
