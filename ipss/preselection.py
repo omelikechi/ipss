@@ -56,7 +56,7 @@ def preselection(X, y, preselector, preselector_args=None):
 			preselector_args_local.setdefault('C', 1 / alpha)
 			model = LogisticRegression(**preselector_args_local)
 		else:
-			preselector_args_local.setdefault('alpha', alpha)
+			preselector_args_local.setdefault('alpha', alpha * np.std(y))
 			model = Lasso(**preselector_args_local)
 
 		feature_importances = np.zeros(p)

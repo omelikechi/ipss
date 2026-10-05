@@ -93,8 +93,9 @@ def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
 		scaled_residuals = y - y_mean * (1 - y_mean)
 		alpha_max = 5 / np.max(np.abs(np.dot(X.T, scaled_residuals) / n))
 		selector = LogisticRegression(penalty='l1', solver='liblinear', tol=1e-3, warm_start=True, class_weight='balanced')
-		if np.isnan(alpha_max):
+		if not np.isfinite(alpha_max):
 			alpha_max = 100
+		alpha_max = compute_alpha_max_logistic(selector, X, y, alpha_max)
 		alpha_min = alpha_max * 1e-10
 		test_alphas = np.logspace(np.log10(alpha_max/2), np.log10(alpha_min), 100)
 	else:
@@ -118,6 +119,44 @@ def compute_alphas(X, y, n_alphas, max_features, binary_response=False):
 			break
 	alphas = np.logspace(np.log10(alpha_max), np.log10(alpha_min), n_alphas)
 	return alphas
+
+# smallest alpha (to within a factor of tol) at which l1 logistic regression selects no features
+def compute_alpha_max_logistic(selector, X, y, alpha_start, tol=1.1, max_steps=50):
+	def n_selected(alpha):
+		selector.set_params(C=1/alpha)
+		with warnings.catch_warnings():
+			warnings.simplefilter('ignore')
+			selector.fit(X, y)
+		return np.sum(selector.coef_ != 0)
+
+	# bracket the threshold: features are selected at lower, none at upper
+	if n_selected(alpha_start) > 0:
+		upper = alpha_start
+		for _ in range(max_steps):
+			upper *= 2
+			if n_selected(upper) == 0:
+				break
+		else:
+			return alpha_start
+		lower = upper / 2
+	else:
+		lower = alpha_start
+		for _ in range(max_steps):
+			lower /= 2
+			if n_selected(lower) > 0:
+				break
+		else:
+			return alpha_start
+		upper = lower * 2
+
+	# bisect on a log scale
+	while upper / lower > tol:
+		mid = np.sqrt(lower * upper)
+		if n_selected(mid) > 0:
+			lower = mid
+		else:
+			upper = mid
+	return upper
 
 def compute_correlation(X):
 	corr_matrix = np.corrcoef(X, rowvar=False)

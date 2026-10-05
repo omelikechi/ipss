@@ -5,6 +5,7 @@ Update (version 1.1.7): SCAD and MCP temporarily disabled due to skglm dependenc
 """
 
 from .linear import (
+	adaptive_weights,
 	fit_l1_regressor,
 	fit_l1_classifier,
 	fit_adaptive_lasso_classifier,
@@ -28,6 +29,7 @@ from .ufi import (
 
 __all__ = [
 	# linear
+	"adaptive_weights",
 	"fit_l1_regressor",
 	"fit_l1_classifier",
 	"fit_adaptive_lasso_classifier",

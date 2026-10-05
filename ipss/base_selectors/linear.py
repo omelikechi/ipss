@@ -10,23 +10,29 @@ import numpy as np
 # from skglm.penalties import SCAD
 from sklearn.linear_model import Lasso, lasso_path, LogisticRegression, Ridge, RidgeClassifier
 
+# adaptive lasso weights from an initial l2-penalized fit (logistic regression if binary, ridge otherwise)
+def adaptive_weights(X, y, binary_response, epsilon=1e-6):
+	with warnings.catch_warnings():
+		warnings.simplefilter('ignore')
+		if binary_response:
+			init_model = LogisticRegression(penalty='l2', solver='liblinear', max_iter=1000)
+		else:
+			init_model = Ridge()
+		init_model.fit(X, y)
+	init_coef = init_model.coef_.flatten()
+	return 1 / (np.abs(init_coef) + epsilon)
+
 # adaptive lasso classifier
 def fit_adaptive_lasso_classifier(X, y, alphas, epsilon=1e-6):
 	n_alphas = len(alphas)
 	n_features = X.shape[1]
 	coefficients = np.zeros((n_alphas, n_features))
 
-	# Initial logistic regression with L2 penalty
-	with warnings.catch_warnings():
-		warnings.simplefilter('ignore')
-		init_model = LogisticRegression(penalty='l2', solver='liblinear', max_iter=1000)
-		init_model.fit(X, y)
-		init_coef = init_model.coef_.flatten()
-
-	weights = 1 / (np.abs(init_coef) + epsilon)
+	# compute adaptive weights and reweight features
+	weights = adaptive_weights(X, y, binary_response=True, epsilon=epsilon)
+	X_weighted = X / weights[np.newaxis, :]
 
 	for i, alpha in enumerate(alphas):
-		X_weighted = X / weights[np.newaxis, :]
 		model = LogisticRegression(penalty='l1', C=1/alpha, solver='liblinear', max_iter=1000)
 		with warnings.catch_warnings():
 			warnings.simplefilter('ignore')
@@ -41,19 +47,12 @@ def fit_adaptive_lasso_regressor(X, y, alphas, epsilon=1e-6):
 	n_features = X.shape[1]
 	coefficients = np.zeros((n_alphas, n_features))
 
-	# get initial coefficients from ridge regression
-	with warnings.catch_warnings():
-		warnings.simplefilter('ignore')
-		init_ridge = Ridge()
-		init_ridge.fit(X,y)
-		init_coef = init_ridge.coef_
-
-	# compute adaptive weights
-	weights = 1 / (np.abs(init_coef) + epsilon)
+	# compute adaptive weights and reweight features
+	weights = adaptive_weights(X, y, binary_response=False, epsilon=epsilon)
+	X_weighted = X / weights[np.newaxis, :]
 
 	# solve weighted lasso for each alpha
 	for i, alpha in enumerate(alphas):
-		X_weighted = X / weights[np.newaxis, :]
 		lasso = Lasso(alpha=alpha)
 		with warnings.catch_warnings():
 			warnings.simplefilter('ignore')

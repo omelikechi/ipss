@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
+from .base_selectors import adaptive_weights
 from .helpers import (check_response_type, compute_alphas, compute_delta, compute_qvalues, integrate,
 	resolve_preselector, resolve_selector, score_based_selection, selector_and_args)
 from .preselection import preselection
@@ -71,7 +72,14 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 	# alphas
 	if n_alphas is None:
 		n_alphas = 25 if selector_type == 'regularization' else 100
-	alphas = compute_alphas(X, y, n_alphas, max_features, binary_response) if selector_type == 'regularization' else None
+	alphas = None
+	if selector_type == 'regularization':
+		# adaptive lasso fits a lasso on X / weights, so calibrate the grid on that reweighted design
+		X_alphas = X
+		if selector in ['adaptive_lasso_classifier', 'adaptive_lasso_regressor']:
+			epsilon = selector_args.get('epsilon', 1e-6)
+			X_alphas = X / adaptive_weights(X, y, binary_response, epsilon)
+		alphas = compute_alphas(X_alphas, y, n_alphas, max_features, binary_response)
 
 	# selector function and args
 	selector_function, selector_args = selector_and_args(selector, selector_args)
