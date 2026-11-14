@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import Lasso, LogisticRegression
+from sklearn.utils import check_random_state
 import xgboost as xgb
 
 # squared distance correlation between response and each feature
@@ -27,8 +28,9 @@ def compute_dcor_scores(X, y):
 		scores[j] = dcov_sqr / np.sqrt(denom) if denom > 0 else 0.0
 	return scores
 
-def preselection(X, y, preselector, preselector_args=None):
+def preselection(X, y, preselector, preselector_args=None, random_state=None):
 	n, p = X.shape
+	rng = check_random_state(random_state)
 
 	if preselector_args is None:
 		preselector_args = {}
@@ -63,7 +65,7 @@ def preselection(X, y, preselector, preselector_args=None):
 		with warnings.catch_warnings():
 			warnings.simplefilter('ignore')
 			for _ in range(n_runs):
-				indices = np.random.choice(n, size=n, replace=True)
+				indices = rng.choice(n, size=n, replace=True)
 				X_sampled, y_sampled = X[indices], y[indices]
 				model.fit(X_sampled, y_sampled)
 				feature_importances += np.abs(model.coef_).ravel()
@@ -77,7 +79,7 @@ def preselection(X, y, preselector, preselector_args=None):
 		model = model_class(**preselector_args_local)
 		feature_importances = np.zeros(p)
 		for _ in range(n_runs):
-			model.set_params(random_state=np.random.randint(1e5))
+			model.set_params(random_state=rng.randint(1e5))
 			model.fit(X,y)
 			feature_importances += model.feature_importances_
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
@@ -91,7 +93,7 @@ def preselection(X, y, preselector, preselector_args=None):
 		model = model_class(**preselector_args_local)
 		feature_importances = np.zeros(p)
 		for i in range(n_runs):
-			model.set_params(random_state=np.random.randint(1e5))
+			model.set_params(random_state=rng.randint(1e5))
 			model.fit(X, y)
 			feature_importances += model.feature_importances_
 		nonzero_mask = feature_importances > 0
@@ -104,7 +106,7 @@ def preselection(X, y, preselector, preselector_args=None):
 		else:
 			n_extra = n_keep - len(nonzero_indices)
 			zero_indices = np.where(~nonzero_mask)[0]
-			extra_indices = np.random.choice(zero_indices, size=n_extra, replace=False)
+			extra_indices = rng.choice(zero_indices, size=n_extra, replace=False)
 			preselect_indices = np.concatenate([nonzero_indices, extra_indices])
 
 	elif preselector == 'dcor':

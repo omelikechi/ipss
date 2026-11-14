@@ -5,6 +5,7 @@ import xgboost as xgb
 
 # gradient boosting classifier
 def fit_gb_classifier(X, y, **kwargs):
+	kwargs.setdefault('random_state', np.random.randint(np.iinfo(np.int32).max))
 	model = xgb.XGBClassifier(**kwargs)
 	model.fit(X,y)
 	feature_importances = model.feature_importances_
@@ -12,6 +13,7 @@ def fit_gb_classifier(X, y, **kwargs):
 
 # gradient boosting regressor
 def fit_gb_regressor(X, y, **kwargs):
+	kwargs.setdefault('random_state', np.random.randint(np.iinfo(np.int32).max))
 	model = xgb.XGBRegressor(**kwargs)
 	model.fit(X,y)
 	feature_importances = model.feature_importances_

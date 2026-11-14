@@ -127,6 +127,7 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 - `standardize_X`: Scale features to have mean 0, standard deviation 1 (bool; default `None`, which standardizes for `'l1'` and `'adaptive_lasso'` only).
 - `center_y`: Center response to have mean 0 (bool; default `None`, which centers for `'l1'` and `'adaptive_lasso'` only). Binary responses are never centered.
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
+- `random_state`: Seed for preselection, subsampling, and the `'gb'`, `'rf'`, and `'ufi'` selectors (int or `None`; default `None`, which uses NumPy's global random state). Each selector fit gets its own seed; `selector_args['random_state']` is ignored.
 
 ### General observations/recommendations:
 - `selector = 'gb'` often best for capturing nonlinear relationships.

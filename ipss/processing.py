@@ -13,7 +13,7 @@ from .preselection import preselection
 
 # prepare ipss arguments and data
 def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, preselector_args,
-	B, n_alphas, ipss_function, delta, standardize_X, center_y, force_regression=False):
+	B, n_alphas, ipss_function, delta, standardize_X, center_y, force_regression=False, random_state=None):
 
 	# cast to float64 (float32 alpha grids underflow/overflow in integrate)
 	X = X.astype(np.float64) if issparse(X) else np.asarray(X, dtype=np.float64)
@@ -45,6 +45,10 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 	else:
 		binary_response, selector = check_response_type(y, selector)
 
+	# code binary responses as 0/1 (required by XGBoost)
+	if binary_response:
+		y = (y == np.unique(y)[1]).astype(np.float64)
+
 	# ipss function
 	if ipss_function is None:
 		ipss_function = 'h2' if selector in ['lasso', 'logistic_regression'] else 'h3'
@@ -67,7 +71,7 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 	p_full = X.shape[1]
 	if preselect:
 		preselector = resolve_preselector(preselector, selector, binary_response)
-		X, preselect_indices = preselection(X, y, preselector, preselector_args)
+		X, preselect_indices = preselection(X, y, preselector, preselector_args, random_state)
 		if preselect_indices.size == 0:
 			warnings.warn('Preselection step removed all features. Returning null result.', UserWarning)
 			return None

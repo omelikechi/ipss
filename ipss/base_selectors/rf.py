@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import train_test_split
+from sklearn.utils import check_random_state
 
 # random forest classifier
 def fit_rf_classifier(X, y, **kwargs):
@@ -13,8 +14,9 @@ def fit_rf_classifier(X, y, **kwargs):
 	if importance_type == 'mdi':
 		feature_importances = model.feature_importances_
 	elif importance_type == 'permutation':
-		X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-		perm_importance = permutation_importance(model, X_test, y_test, n_repeats=1)
+		X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=kwargs.get('random_state'))
+		model.fit(X_train, y_train)
+		perm_importance = permutation_importance(model, X_test, y_test, n_repeats=1, random_state=kwargs.get('random_state'))
 		feature_importances = perm_importance.importances_mean
 	else:
 		raise ValueError("importance_type must be either 'mdi' or 'permutation'")
@@ -28,14 +30,16 @@ def fit_rf_regressor(X, y, **kwargs):
 	if importance_type == 'mdi':
 		feature_importances = model.feature_importances_
 	elif importance_type == 'permutation':
-		X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-		perm_importance = permutation_importance(model, X_test, y_test, n_repeats=1)
+		X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=kwargs.get('random_state'))
+		model.fit(X_train, y_train)
+		perm_importance = permutation_importance(model, X_test, y_test, n_repeats=1, random_state=kwargs.get('random_state'))
 		feature_importances = perm_importance.importances_mean
 	elif importance_type == 'shadow':
 		n, p = X.shape
 		X_shadow = X.copy()
+		rng = check_random_state(kwargs.get('random_state'))
 		for i in range(p):
-			np.random.shuffle(X_shadow[:,i])
+			rng.shuffle(X_shadow[:,i])
 		X_combined = np.hstack((X, X_shadow))
 		model.fit(X_combined, y)
 		importances_combined = model.feature_importances_
