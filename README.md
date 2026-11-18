@@ -36,8 +36,8 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `efp_scores`: Dictionary whose keys are feature indices and values are their efp scores (dict of length `p`).
 - `q_values`: Dictionary whose keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
-- `selected_features`: Indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
-- `stability_paths`: Estimated selection probabilities at each parameter in the interval used by IPSS (array of shape `(k, p)`, with `k <= n_alphas`).
+- `selected_features`: Indices of selected features, if `target_fdr` or `target_fp` is given (list of ints).
+- `stability_paths`: Estimated selection probabilities (array of shape `(k, p)`, with `k <= n_alphas`).
 
 ### Selecting features
 Each feature (column of `X`) is assigned:
@@ -46,14 +46,19 @@ Each feature (column of `X`) is assigned:
 
 To select features:
 - **Control FDR** by choosing all features with `q_value ≤ target_fdr`  
-  _Example: Selecting features with `q_value ≤ 0.1` controls the FDR at level 0.1 (approximately)_
+  _Example: Selecting features with `q_value ≤ 0.1` controls the FDR at level 0.1_
 - **Control E(FP)** by choosing all features with `efp_score ≤ target_fp`  
   _Example: Selecting features with `efp_score ≤ 2` controls the E(FP) at level 2_
 
+## Main arguments
+- `selector`: Base algorithm (default `'gb'`). `'gb'` (gradient boosting) and `'rf'` (random forest) capture nonlinear relationships; `'l1'` (lasso or l1 logistic regression) and `'adaptive_lasso'` capture linear ones. A custom function is also allowed (see below).
+- `selector_args`: Arguments for the base algorithm (dict; default `None`).
+- `n_jobs`: Number of jobs to run in parallel (int; default `1`).
+
+See [ARGUMENTS.md](https://github.com/omelikechi/ipss/blob/main/ARGUMENTS.md) for the full list of arguments.
+
 ## Usage with custom feature importance scores
-For custom feature importance scores, `selector` must be a function that takes `X` and `y` as inputs (as well as an optional
-dictionary of arguments `selector_args` specific to the feature importance function), and returns a list or NumPy array of 
-importance scores, one per feature, that must align with the column order in `X`.
+`selector` can also be a function that takes `X`, `y`, and the keyword arguments in `selector_args`, and returns one importance score per feature.
 ```python
 import numpy as np
 from sklearn.linear_model import Ridge
@@ -70,10 +75,3 @@ ipss_output = ipss(X, y, selector=ridge_selector, selector_args={'alpha': 1})
 The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder includes analyses of
 - **Simulated data**: `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
 - **Cancer data**: `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer.ipynb)).
-
-## Main arguments
-- `selector`: Base algorithm (default `'gb'`). `'gb'` (gradient boosting) and `'rf'` (random forest) capture nonlinear relationships; `'l1'` (lasso or l1 logistic regression) and `'adaptive_lasso'` capture linear ones. A custom function is also allowed (see above).
-- `selector_args`: Arguments for the base algorithm (dict; default `None`).
-- `n_jobs`: Number of jobs to run in parallel (int; default `1`).
-
-The other arguments rarely need changing. See [ARGUMENTS.md](https://github.com/omelikechi/ipss/blob/main/ARGUMENTS.md) for the full list.
