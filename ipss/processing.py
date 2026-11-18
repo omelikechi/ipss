@@ -172,7 +172,10 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 		return None
 	
 	# no feature can be selected by an l1 selector if no feature is correlated with a continuous response
-	if selector_type == 'regularization' and not binary_response and not issparse(X) and np.max(np.abs(X.T @ y)) == 0:
+	# (errstate silences spurious matmul warnings from Apple's Accelerate BLAS)
+	with np.errstate(all='ignore'):
+		uncorrelated = selector_type == 'regularization' and not binary_response and not issparse(X) and np.max(np.abs(X.T @ y)) == 0
+	if uncorrelated:
 		warnings.warn('No feature is correlated with the response, so no feature can be selected. Returning null '
 			'result.', UserWarning)
 		return None
