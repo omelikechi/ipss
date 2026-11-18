@@ -37,7 +37,7 @@ print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
 - `q_values`: Dictionary whose keys are feature indices and values are their q-values (dict of length `p`).
 - `runtime`: Runtime of the algorithm in seconds (float).
 - `selected_features`: Indices of features selected by IPSS; empty list if `target_fp` and `target_fdr` are not specified (list of ints).
-- `stability_paths`: Estimated selection probabilities at each parameter (array of shape `(n_alphas, p)`).
+- `stability_paths`: Estimated selection probabilities at each parameter in the interval used by IPSS (array of shape `(k, p)`, with `k <= n_alphas`).
 
 ### Selecting features
 Each feature (column of `X`) is assigned:
@@ -46,7 +46,7 @@ Each feature (column of `X`) is assigned:
 
 To select features:
 - **Control FDR** by choosing all features with `q_value ≤ target_fdr`  
-  _Example: Selecting features with `q_value ≤ 0.1` controls the FDR at level 0.1_
+  _Example: Selecting features with `q_value ≤ 0.1` controls the FDR at level 0.1 (approximately)_
 - **Control E(FP)** by choosing all features with `efp_score ≤ target_fp`  
   _Example: Selecting features with `efp_score ≤ 2` controls the E(FP) at level 2_
 
@@ -55,27 +55,15 @@ For custom feature importance scores, `selector` must be a function that takes `
 dictionary of arguments `selector_args` specific to the feature importance function), and returns a list or NumPy array of 
 importance scores, one per feature, that must align with the column order in `X`.
 ```python
+import numpy as np
+from sklearn.linear_model import Ridge
 from ipss import ipss
 
-# define custom feature importance function based on ridge regression
-from sklearn.linear_model import Ridge
-selector_args = {'alpha':1}
+# custom feature importance function based on ridge regression
 def ridge_selector(X, y, alpha):
-	model = Ridge(alpha=alpha)
-	model.fit(X,y)
-	feature_importance_scores = np.abs(model.coef_)
-	return feature_importance_scores
+	return np.abs(Ridge(alpha=alpha).fit(X, y).coef_)
 
-# load n-by-p feature matrix X and n-by-1 response vector y
-
-# run ipss
-ipss_output = ipss(X, y, selector=ridge_selector, selector_args=selector_args)
-
-# select features based on target FDR
-target_fdr = 0.1
-q_values = ipss_output['q_values']
-selected_features = [idx for idx, q_value in q_values.items() if q_value <= target_fdr]
-print(f'Selected features (target FDR = {target_fdr}): {selected_features}')
+ipss_output = ipss(X, y, selector=ridge_selector, selector_args={'alpha': 1})
 ```
 
 ## Examples
@@ -83,63 +71,9 @@ The [examples](https://github.com/omelikechi/ipss/tree/main/examples) folder inc
 - **Simulated data**: `simple_example.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/simple_example.ipynb)).
 - **Cancer data**: `cancer.py` ([Open in Google Colab](https://colab.research.google.com/github/omelikechi/ipss/blob/main/examples/cancer.ipynb)).
 
-## Full list of `ipss` arguments
-
-### Required arguments:
-- `X`: Features (array of shape `(n,p)`), where `n` is the number of samples and `p` is the number of features.
-- `y`: Response (array of shape `(n,)` or `(n, 1)`). `ipss` automatically detects if `y` is binary.
-
-### Optional arguments:
-- `selector`: Base algorithm to use (str; default `'gb'`).
-	- **Nonparametric methods**
-		- `'gb'`: Gradient boosting (XGBoost).
-		- `'rf'`: Random forest (scikit-learn).
-	- **Penalized regression methods**
-		- `'adaptive_lasso'`: Adaptive lasso (scikit-learn)
-		- `'l1'`: L1-regularized linear or logistic regression (scikit-learn).
-		<!-- - `'mcp'`: Minimax concave penalty (skglm). -->
-		<!-- - `'scad'`: Smoothly clipped absolute deviation penalty (skglm). -->
-	- **Custom**
-		- Users can provide their own feature importance function (see example above). 
+## Main arguments
+- `selector`: Base algorithm (default `'gb'`). `'gb'` (gradient boosting) and `'rf'` (random forest) capture nonlinear relationships; `'l1'` (lasso or l1 logistic regression) and `'adaptive_lasso'` capture linear ones. A custom function is also allowed (see above).
 - `selector_args`: Arguments for the base algorithm (dict; default `None`).
-- `preselect`: Preselect/filter features prior to subsampling (bool; default `True`).
-- `preselector`: Method used to preselect features (default `None`, which resolves to `'dcor'` for every `selector` except `'l1'`/`'adaptive_lasso'`, which use their own linear preselection). Options:
-	- `'gb'`: Gradient boosting (XGBoost) feature importances.
-	- `'rf'`: Random forest (scikit-learn) feature importances.
-	- `'l1'` or `'adaptive_lasso'`: (Adaptive) lasso/logistic regression coefficients.
-	- `'dcor'`: Distance correlation. Captures nonlinear relationships and is fast and deterministic.
-	- Custom: a function `preselector(X, y, **preselector_args) -> array of length p` giving a feature importance score per feature; the top-scoring features (see `n_keep` below) are kept.
-- `preselector_args`: Arguments for the preselection algorithm (dict; default `None`). Recognized keys:
-	- `n_runs`: Number of times to refit the preselector, averaging feature importances across runs (int; default `3`; ignored by `'dcor'`, which is deterministic).
-	- `n_keep`: Number of features to keep (int; defaults depend on `preselector`).
-	- `expansion_factor`: For `'gb'` only, multiplies the number of features with nonzero importance to set `n_keep` (float; default `1.5`).
-	- `engine`: For `'dcor'` only (str; default `'numpy'`). `'numpy'` computes distance correlation from scratch in `O(n^2)`. `'dcor'` instead uses the `dcor` package's faster `O(n log n)` algorithm, which scales better for large `n` but requires installing the `dcor` extra (`pip install ipss[dcor]` or `pip install dcor`).
-- `target_fp`: Target number of false positives to control (positive float; default `None`).
-- `target_fdr`: Target false discovery rate (FDR) (positive float; default `None`).
-- `B`: Number of subsampling steps (int; default `100` if `selector` is `'gb'`, `50` otherwise).
-- `n_alphas`: Number of values in the regularization or threshold grid (int; default `25` if `'l1'` else `100`).
-- `ipss_function`: Function to apply to selection probabilities (str; default `'h2'` if `'l1'` else `'h3'`). Options:
-	- `'h1'`: Linear function, ```h1(x) = 2x - 1 if x >= 0.5 else 0```.
-	- `'h2'`: Quadratic function, ```h2(x) = (2x - 1)**2 if x >= 0.5 else 0```.
-	- `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
-- `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive float; default `0.05`).
-- `delta`: Defines probability measure; see `Associated papers` (float; defaults depend on `selector`).
-- `standardize_X`: Scale features to have mean 0, standard deviation 1 (bool; default `None`, which standardizes for `'l1'` and `'adaptive_lasso'` only).
-- `center_y`: Center response to have mean 0 (bool; default `None`, which centers for `'l1'` and `'adaptive_lasso'` only). Binary responses are never centered.
 - `n_jobs`: Number of jobs to run in parallel (int; default `1`).
-- `random_state`: Seed for preselection, subsampling, and the `'gb'`, `'rf'`, and `'ufi'` selectors (int or `None`; default `None`, which uses NumPy's global random state). Each selector fit gets its own seed; `selector_args['random_state']` is ignored.
 
-### General observations/recommendations:
-- `selector = 'gb'` often best for capturing nonlinear relationships.
-- `selector = 'l1'` or `'adaptive_lasso'` often best for capturing linear relationships.
-- `preselector = 'dcor'` (the default for every `selector` except `'l1'`/`'adaptive_lasso'`) captures nonlinearities and, unlike the model-based preselectors (`'gb'`, `'rf'`, `'ufi'`), is deterministic.
-- For FDR control, we generally recommend computing q-values with `ipss` and then using them to select features at the desired FDR threshold, rather than specifying `target_fdr`, which should be left as `None`. This provides greater flexibility when selecting features.
-- For E(FP) control, we generally recommend computing efp scores with `ipss` and then using them to select features at the desired false positive threshold, rather than specifying `target_fp`, which should be left as `None`. This provides greater flexibility when selecting features.
-- In general, all other parameters should not be changed
-	- `selector_args` include, e.g., decision tree parameters for tree-based models
-	- Results are robust to `B` provided it is greater than `25`
-	- `'h3'` is less conservative than `'h2'` which is less conservative than `'h1'`.
-	- Preselection can significantly reduce computation time and increase power.
-	- Results are robust to `cutoff` provided it is between `0.025` and `0.1`.
-	- Features are automatically standardized for the penalized regression methods.
-	- The response is automatically centered for the regularized regression methods.
+The other arguments rarely need changing. See [ARGUMENTS.md](https://github.com/omelikechi/ipss/blob/main/ARGUMENTS.md) for the full list.

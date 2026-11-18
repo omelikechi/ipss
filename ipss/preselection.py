@@ -8,6 +8,8 @@ from sklearn.linear_model import Lasso, LogisticRegression
 from sklearn.utils import check_random_state
 import xgboost as xgb
 
+from .helpers import is_integer, is_number, validate_scores
+
 # squared distance correlation between response and each feature
 """
 "Measuring and testing dependence by correlation of distances" by Szekely et al (Annals of Statistics, 2007)
@@ -40,6 +42,12 @@ def preselection(X, y, preselector, preselector_args=None, random_state=None):
 	n_keep = preselector_args_local.pop('n_keep', None)
 	expansion_factor = preselector_args_local.pop('expansion_factor', 1.5)
 	engine = preselector_args_local.pop('engine', 'numpy')
+	if not is_integer(n_runs) or n_runs < 1:
+		raise ValueError(f"preselector_args['n_runs'] must be a positive integer, but got {n_runs!r}.")
+	if n_keep is not None and (not is_integer(n_keep) or n_keep < 1):
+		raise ValueError(f"preselector_args['n_keep'] must be a positive integer, but got {n_keep!r}.")
+	if not is_number(expansion_factor) or expansion_factor <= 0:
+		raise ValueError(f"preselector_args['expansion_factor'] must be positive, but got {expansion_factor!r}.")
 
 	preselect_indices = []
 
@@ -51,10 +59,16 @@ def preselection(X, y, preselector, preselector_args=None, random_state=None):
 		correlations = np.array([np.abs(np.corrcoef(X_filtered[:, i], y)[0, 1]) for i in range(X_filtered.shape[1])])
 		correlations = np.nan_to_num(correlations)
 
-		alpha = max(np.sort(correlations)[::-1][min(p - 1, 2 * n_keep)], 1e-6)
+		# index into the correlations of the nonconstant features only
+		if correlations.size == 0:
+			alpha = 1e-6
+		else:
+			alpha = max(np.sort(correlations)[::-1][min(correlations.size - 1, 2 * n_keep)], 1e-6)
 
 		if preselector in ['logistic_regression', 'adaptive_lasso_classifier']:
-			preselector_args_local = preselector_args_local or {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'class_weight':'balanced'}
+			# user arguments are added to (and override) the l1 defaults rather than replacing them
+			preselector_args_local = {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'class_weight':'balanced',
+				**preselector_args_local}
 			preselector_args_local.setdefault('C', 1 / alpha)
 			model = LogisticRegression(**preselector_args_local)
 		else:
@@ -64,14 +78,20 @@ def preselection(X, y, preselector, preselector_args=None, random_state=None):
 		feature_importances = np.zeros(p)
 		with warnings.catch_warnings():
 			warnings.simplefilter('ignore')
+			classification = preselector in ['logistic_regression', 'adaptive_lasso_classifier']
 			for _ in range(n_runs):
-				indices = rng.choice(n, size=n, replace=True)
+				if classification:
+					# bootstrap within each class, so that every resample contains both classes
+					indices = np.concatenate([rng.choice(np.flatnonzero(y == c), size=np.sum(y == c), replace=True)
+						for c in np.unique(y)])
+				else:
+					indices = rng.choice(n, size=n, replace=True)
 				X_sampled, y_sampled = X[indices], y[indices]
 				model.fit(X_sampled, y_sampled)
 				feature_importances += np.abs(model.coef_).ravel()
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
 
-	elif preselector in ['rf_classifier', 'rf_regressor', 'ufi_classifier', 'ufi_regressor']:
+	elif preselector in ['rf_classifier', 'rf_regressor']:
 		n_keep = n_keep or 100
 		preselector_args_local.setdefault('max_features', 0.1)
 		preselector_args_local.setdefault('n_estimators', 25)
@@ -98,7 +118,8 @@ def preselection(X, y, preselector, preselector_args=None, random_state=None):
 			feature_importances += model.feature_importances_
 		nonzero_mask = feature_importances > 0
 		total_nonzero = np.sum(nonzero_mask)
-		n_keep = min(p, max(100, int(expansion_factor * total_nonzero)))
+		# a requested n_keep is used as given; otherwise keep 1.5x the features with nonzero importance (at least 100)
+		n_keep = min(p, n_keep) if n_keep is not None else min(p, max(100, int(expansion_factor * total_nonzero)))
 		nonzero_indices = np.where(nonzero_mask)[0]
 		# randomly sample zero-importance features
 		if len(nonzero_indices) >= n_keep:
@@ -128,13 +149,20 @@ def preselection(X, y, preselector, preselector_args=None, random_state=None):
 	elif callable(preselector):
 		n_keep = n_keep or 200
 		feature_importances = np.zeros(p)
-		for _ in range(n_runs):
-			feature_importances += preselector(X, y, **preselector_args_local)
+		# seed numpy's global random state so that custom preselectors that draw from it are reproducible
+		state = np.random.get_state()
+		np.random.seed(rng.randint(np.iinfo(np.int32).max))
+		try:
+			for _ in range(n_runs):
+				feature_importances += validate_scores(preselector(X, y, **preselector_args_local), (p,),
+					'the preselector')
+		finally:
+			np.random.set_state(state)
 		preselect_indices = np.argsort(feature_importances)[::-1][:n_keep]
 
 	else:
 		raise ValueError(
-			f"Unrecognized preselector: {preselector!r}. Must be one of 'gb', 'rf', 'ufi', 'l1', "
+			f"Unrecognized preselector: {preselector!r}. Must be one of 'gb', 'rf', 'l1', "
 			"'adaptive_lasso', 'dcor', or a custom callable."
 		)
 

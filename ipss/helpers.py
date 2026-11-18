@@ -1,5 +1,6 @@
 # Helper functions for IPSS
 
+import re
 import warnings
 
 import numpy as np
@@ -58,14 +59,21 @@ def resolve_selector(selector, binary_response):
 	return selector
 
 def resolve_preselector(preselector, selector, binary_response):
-	# default: dcor for every selector except (adaptive) lasso, which keeps its own linear preselection
+	# default: the selector's own preselection for gb and (adaptive) lasso, and dcor for every other selector.
+	# For gb, dcor preselection exceeded FDR targets several-fold on correlated RNA-seq features at large p (it keeps
+	# every gene that is correlated with a true one), while gb preselection kept FDR near or below target (it is more
+	# conservative there, finding fewer true features)
 	if preselector is None:
-		regularization_selectors = ('lasso', 'logistic_regression', 'adaptive_lasso_classifier', 'adaptive_lasso_regressor')
-		if selector in regularization_selectors:
+		own_selectors = ('lasso', 'logistic_regression', 'adaptive_lasso_classifier', 'adaptive_lasso_regressor',
+			'gb_classifier', 'gb_regressor')
+		if selector in own_selectors:
 			return selector
 		return 'dcor'
 	if not isinstance(preselector, str):
 		return preselector
+	if preselector in ('ufi', 'ufi_classifier', 'ufi_regressor'):
+		raise ValueError("'ufi' is not available as a preselector (it was an ordinary random forest); use 'rf', 'gb', "
+			"'dcor', or a custom preselector. selector='ufi' is unaffected.")
 	if preselector == 'adaptive_lasso':
 		return 'adaptive_lasso_classifier' if binary_response else 'adaptive_lasso_regressor'
 	elif preselector == 'l1':
@@ -74,8 +82,6 @@ def resolve_preselector(preselector, selector, binary_response):
 		return 'rf_classifier' if binary_response else 'rf_regressor'
 	elif preselector == 'gb':
 		return 'gb_classifier' if binary_response else 'gb_regressor'
-	elif preselector == 'ufi':
-		return 'ufi_classifier' if binary_response else 'ufi_regressor'
 	return preselector
 
 def check_response_type(y, selector):
@@ -154,102 +160,112 @@ def compute_alpha_max_logistic(selector, X, y, alpha_start, tol=1.1, max_steps=5
 			upper = mid
 	return upper
 
-def compute_correlation(X):
-	corr_matrix = np.corrcoef(X, rowvar=False)
-	abs_corr_matrix = np.abs(corr_matrix)
-	np.fill_diagonal(abs_corr_matrix, 0)
-	avg_correlation = np.mean(np.mean(abs_corr_matrix, axis=1))
-	max_correlations = np.max(abs_corr_matrix, axis=1)
-	avg_max_correlation = np.mean(max_correlations)
-	return avg_correlation, avg_max_correlation
+# order m of the ipss function h_m(x) = (2x - 1)^m for x > 0.5 (else 0), given as 'h1', 'h2', ...
+def ipss_function_order(ipss_function):
+	if isinstance(ipss_function, str) and re.fullmatch(r'h[1-9][0-9]*', ipss_function):
+		m = int(ipss_function[1:])
+		if m <= 100:
+			return m
+	raise ValueError(f"ipss_function must be 'h1', 'h2', ..., 'h100' (h followed by an integer from 1 to 100), but got "
+		f'{ipss_function!r}.')
 
-def compute_delta(X, selector):
-	if selector in ['logistic_regression', 'lasso']:
-		avg_cor, avg_max = compute_correlation(X)
-		if avg_cor <= 1/20:
-			delta = 1
-		elif avg_cor >= 1/4:
-			delta = 0
-		else:
-			# solve delta = c_0 + c_1 * avg_cor + c_2 * avg_max
-			M = np.array([
-				[1, 1/20, 1/2], 
-				[1, 1/4, 1/2], 
-				[1, 1/20, 1]
-			])
-			deltas = np.array([1, 0, 0])
-			coefs = np.linalg.inv(M) @ deltas
-			m = np.array([1, avg_cor, avg_max])
-			delta = coefs.T @ m
-			delta = max(0, min(1, delta))
-	elif selector in ['gb_classifier', 'adaptive_lasso_regressor', 'adaptive_lasso_classifier']:
-		delta = 1
-	else:
-		delta = 1.25
-	return delta
+# integrand of the E(FP) bound I(Lambda) for h_m: p * sum_k S(m, k) B(B - 1)...(B - k + 1) (q / p)^(2k) / B^m, where
+# q is the average number of selected features and S(m, k) are Stirling numbers of the second kind (under the
+# assumptions of the IPSS paper); m = 1, 2, 3 give the bounds written out in the paper
+def efp_bound_integrand(average_selected, p, B, m):
+	r = np.asarray(average_selected, dtype=np.float64) / p
+	stirling = [[1]]
+	for i in range(1, m + 1):
+		stirling.append([0] + [k * (stirling[i - 1][k] if k < i else 0) + stirling[i - 1][k - 1] for k in range(1, i + 1)])
+	bound = np.zeros_like(r)
+	falling = 1.0
+	for k in range(1, m + 1):
+		falling *= (B - k + 1) / B
+		bound += stirling[m][k] * falling * r ** (2 * k) / B ** (m - k)
+	return p * bound
 
+# default delta for every selector: with the corrected scoring, results vary little with delta (checked over 0 to 3)
+default_delta = 1
+
+# q-value of each feature: q(j) = min over t >= efp(j) of t / #{k : efp(k) <= t}
 def compute_qvalues(efp_scores):
-	T = list(efp_scores.values())
-	fdrs = []
-	for t in T:
-		efp_scores_leq_t = [score for score in efp_scores.values() if score <= t]
-		FP = max(efp_scores_leq_t)
-		S = len(efp_scores_leq_t)
-		fdrs.append((t, FP/S))
-	q_values = {
-		feature: min(fdr for t, fdr in fdrs if score <= t)
-		for feature, score in efp_scores.items()
-	}
-	return q_values
+	features = list(efp_scores.keys())
+	scores = np.array([efp_scores[feature] for feature in features], dtype=np.float64)
+	if scores.size == 0:
+		return {}
+	if not np.all(np.isfinite(scores)):
+		raise ValueError('efp scores must be finite to compute q-values.')
+	thresholds = np.unique(scores)
+	n_selected = np.searchsorted(np.sort(scores), thresholds, side='right')
+	fdrs = np.minimum.accumulate((thresholds / n_selected)[::-1])[::-1]
+	q_values = fdrs[np.searchsorted(thresholds, scores)]
+	return {feature: float(q) for feature, q in zip(features, q_values)}
 
+# unnormalized mass of mu_delta(dlambda) ~ lambda^(-delta) dlambda on each grid interval [alphas[i], alphas[i-1]],
+# rescaled by a common factor for numerical stability
+def interval_masses(alphas, delta=1):
+	alphas = np.asarray(alphas, dtype=np.float64)
+	if alphas.ndim != 1 or alphas.size < 2 or not np.all(alphas > 0):
+		raise ValueError('alphas must be a one-dimensional grid of at least two positive values.')
+	upper, lower = alphas[:-1], alphas[1:]
+	if not np.all(upper > lower):
+		raise ValueError('alphas must be strictly decreasing.')
+	log_ratio = np.log(upper / lower)
+	e = 1 - delta
+	if e == 0:
+		log_mass = np.log(log_ratio)
+	else:
+		# integral of lambda^(-delta) over [lower, upper] = lower^e * (exp(e * log_ratio) - 1) / e, in logs
+		log_mass = e * np.log(lower) + np.log(np.expm1(e * log_ratio) / e)
+	return np.exp(log_mass - np.max(log_mass))
+
+"""
+Integral of a path over [alphas[-1], alphas[0]] with respect to the probability measure mu_delta normalized
+on that interval. Each grid interval [alphas[i], alphas[i-1]] gets its exact mu_delta mass and the value of
+the path at its upper endpoint, alphas[i-1] (the Riemann sum of Proposition S1.1 in the IPSS supplement, with
+weights that sum exactly to 1). This is the exact integral with respect to a discrete probability measure on
+the grid, so bounds that hold for any probability measure hold exactly for it.
+
+values: path evaluated at each alpha, shape (n_alphas,) or (n_alphas, p)
+cutoff: if given, the interval is shortened to [alphas[k-1], alphas[0]] for the smallest alpha (largest k) reached
+	before the integral, normalized on the shortened interval, first exceeds the cutoff (Equation 3.3)
+
+Returns the integral and k, the number of grid points in the interval used.
+"""
 def integrate(values, alphas, delta=1, cutoff=None):
-	n_alphas = len(alphas)
-	a = min(alphas)
-	b = max(alphas)
-	if delta == 1:
-		normalization = (1 - (a/b)**(1/n_alphas)) / np.log(b/a)
-	else:
-		normalization = (1 - delta) * (1 - (a/b)**(1/n_alphas)) / (b**(1-delta) - a**(1-delta))
-	output = 0
-	stop_index = n_alphas
+	values = np.asarray(values, dtype=np.float64)
+	masses = interval_masses(alphas, delta)
+	weighted = np.tensordot(masses, values[:-1], axes=(0, 0))
 	if cutoff is None:
-		for i in range(1, n_alphas):
-			weight = 1 if delta == 1 else alphas[i]**(1-delta)
-			output += normalization * weight * values[i-1]
-	else:
-		for i in range(1, n_alphas):
-			weight = 1 if delta == 1 else alphas[i]**(1-delta)
-			updated_output = output + normalization * weight * values[i-1]
-			if updated_output > cutoff:
-				stop_index = i
-				break
-			else:
-				output = updated_output
-	return output, stop_index
+		return weighted / np.sum(masses), len(alphas)
+	if values.ndim != 1:
+		raise ValueError('a cutoff requires a one-dimensional path.')
+	averages = np.cumsum(masses * values[:-1]) / np.cumsum(masses)
+	exceeded = np.flatnonzero(averages > cutoff)
+	n_intervals = max(1, exceeded[0]) if exceeded.size > 0 else len(masses)
+	return averages[n_intervals - 1], n_intervals + 1
 
 def return_null_result(p, runtime):
 	efp_scores = {j: p for j in range(p)}
 	q_values = {j: 1 for j in range(p)}
-	return {'efp_scores': efp_scores, 'q_values':q_values, 'runtime':runtime, 'selected_features':[], 'stability_paths':[]}
+	return {'efp_scores': efp_scores, 'q_values':q_values, 'runtime':runtime, 'selected_features':[], 'stability_paths':np.zeros((0, p))}
 
-def score_based_selection(results, n_alphas):
-	alpha_min = np.min(results)
-	if alpha_min < 0:
-		results += np.abs(alpha_min)
-	alpha_max = np.max(results) + .01
-	alpha_min = alpha_max / 1e8
-	alphas = np.logspace(np.log10(alpha_max), np.log10(alpha_min), n_alphas)
-	B, _, p = results.shape
-
-	reshape_results = np.empty((B, n_alphas, 2, p))
-	for i in range(n_alphas):
-		reshape_results[:,i,:,:] = results
-	results = reshape_results
-	for i, alpha in enumerate(alphas):
-		for b in range(B):
-			for j in range(2):
-				results[b,i,j,:] = (results[b,i,j,:] > alpha).astype(int)
-	return results, alphas
+# threshold importance scores on a grid that scales with the scores, so that selections do not depend on their units
+"""
+results: importance scores, shape (B, 2, p). Negative scores are clipped to 0, so a feature is selected at
+threshold alpha only if its score is positive and greater than alpha. The grid runs from just above the largest
+score down to 1e-8 times that value; its first point is above every score, so nothing is selected there. If no
+score is positive, nothing is ever selected and the result is the null result.
+"""
+def score_based_selection(results, n_alphas, margin=1.01):
+	results = np.clip(np.asarray(results, dtype=np.float64), 0, None)
+	max_score = np.max(results) if results.size > 0 else 0.0
+	scale = max_score if max_score > 0 else 1.0
+	alpha_max = margin * scale
+	alphas = np.logspace(np.log10(alpha_max), np.log10(alpha_max / 1e8), n_alphas)
+	# indicators[b, i, j, :] = 1 if the score of fit j in step b exceeds alphas[i]
+	indicators = (results[:, None, :, :] > alphas[None, :, None, None]).astype(np.uint8)
+	return indicators, alphas
 
 def selector_and_args(selector, selector_args):
 	selectors = {
@@ -265,22 +281,116 @@ def selector_and_args(selector, selector_args):
 		'ufi_regressor':fit_ufi_regressor,
 	}
 
+	defaults = {
+		'logistic_regression': {'penalty':'l1', 'solver':'liblinear', 'tol':1e-3, 'warm_start':True, 'class_weight':'balanced'},
+		'gb_classifier': {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'},
+		'gb_regressor': {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'},
+		'rf_classifier': {'max_features':1/10, 'n_estimators':50},
+		'rf_regressor': {'max_features':1/10, 'n_estimators':50},
+		'ufi_classifier': {'n_estimators':100},
+		'ufi_regressor': {'n_estimators':100},
+	}
+
+	selector_args = dict(selector_args or {})
 	if selector in selectors:
 		selector_function = selectors[selector]
-		if selector_args:
-			selector_args = selector_args
-		elif selector == 'logistic_regression':
-			selector_args = {'penalty': 'l1', 'solver':'liblinear', 'tol': 1e-3, 'warm_start': True, 'class_weight': 'balanced'}
-			# selector_args = {'penalty': 'l1', 'solver':'saga', 'tol': 1e-3, 'warm_start': True, 'class_weight': 'balanced'}
-		elif selector in ['gb_classifier', 'gb_regressor']:
-			selector_args = {'max_depth':1, 'colsample_bynode':1/3, 'n_estimators':100, 'importance_type':'gain'}
-		elif selector in ['rf_classifier', 'rf_regressor']:
-			selector_args = {'max_features':1/10, 'n_estimators':50}
-		elif selector in ['ufi_classifier', 'ufi_regressor']:
-			selector_args = {'n_estimators':100}
-		else:
-			selector_args = {}
+		# user arguments are added to (and override) the defaults rather than replacing them
+		selector_args = {**defaults.get(selector, {}), **selector_args}
 	else:
 		selector_function = selector
 	return selector_function, selector_args
 
+
+#----------------------------------------------------------------
+# Stratified subsampling
+#----------------------------------------------------------------
+"""
+Two disjoint subsamples, each of exactly subsample_size (at most n // 2), with the class proportions of labels.
+Each class gets about 2 * subsample_size * (its share of the samples) places in total (largest remainders), and at
+least 2 if it has 2 or more samples, so that it appears in both subsamples. Each class's places are split between
+the subsamples as evenly as possible; odd totals alternate between the subsamples, so both have the same size.
+rng is a RandomState (or the np.random module).
+"""
+def stratified_halves(labels, subsample_size, rng):
+	labels = np.asarray(labels)
+	n = labels.size
+	if not is_integer(subsample_size) or not 1 <= subsample_size <= n // 2:
+		raise ValueError(f'subsample_size must be an integer between 1 and n // 2 = {n // 2}, but got {subsample_size!r}.')
+	classes = [np.flatnonzero(labels == c) for c in np.unique(labels)]
+	counts = np.array([idx.size for idx in classes])
+	total = 2 * subsample_size
+	target = total * counts / n
+	places = np.floor(target).astype(int)
+	order = np.argsort(-(target - places), kind='stable')
+	places[order[:total - places.sum()]] += 1
+	for k in np.flatnonzero((places < 2) & (counts >= 2)):
+		while places[k] < 2:
+			donor = int(np.argmax(places))
+			if places[donor] <= 2:
+				break
+			places[donor] -= 1
+			places[k] += 1
+	sizes = [[m // 2, m // 2] for m in places]
+	extra = 0
+	for k in np.flatnonzero(places % 2):
+		sizes[k][extra] += 1
+		extra = 1 - extra
+	halves = [[], []]
+	for idx, (a, b) in zip(classes, sizes):
+		idx = rng.permutation(idx)
+		halves[0].append(idx[:a])
+		halves[1].append(idx[a:a + b])
+	return [rng.permutation(np.concatenate(half)) for half in halves]
+
+#----------------------------------------------------------------
+# Jittering
+#----------------------------------------------------------------
+"""
+"Just add noise" by Li and Melikechi (2026): tree importance scores favor continuous features over categorical ones,
+because a categorical feature has only a few candidate splits. Adding a small amount of uniform noise to each
+categorical feature, once before fitting, removes this bias. The noise for each column is Unif(-s, s) with
+s = strength * (smallest gap between its distinct values), so integer-encoded categories get the paper's
+Unif(-1e-4, 1e-4) and the categories stay separated for any encoding.
+"""
+jitter_max_levels = 10
+jitter_strength = 1e-4
+
+# columns with between 2 and max_levels distinct values
+def categorical_columns(X, max_levels=jitter_max_levels):
+	return np.array([j for j in range(X.shape[1]) if 2 <= np.unique(X[:, j]).size <= max_levels], dtype=int)
+
+def jitter_columns(X, columns, rng, strength=jitter_strength):
+	X = X.copy()
+	for j in columns:
+		values = np.unique(X[:, j])
+		if values.size < 2:
+			continue
+		width = strength * np.min(np.diff(values))
+		X[:, j] += rng.uniform(-width, width, X.shape[0])
+	return X
+
+#----------------------------------------------------------------
+# Input validation
+#----------------------------------------------------------------
+def is_integer(value):
+	return isinstance(value, (int, np.integer)) and not isinstance(value, (bool, np.bool_))
+
+def is_number(value):
+	return isinstance(value, (int, float, np.integer, np.floating)) and not isinstance(value, (bool, np.bool_)) \
+		and np.isfinite(value)
+
+def validate_targets(target_fp, target_fdr):
+	if target_fp is not None and target_fdr is not None:
+		raise ValueError('Specify at most one of target_fp and target_fdr.')
+	if target_fp is not None and not (is_number(target_fp) and target_fp > 0):
+		raise ValueError(f'target_fp must be a positive number, but got {target_fp!r}.')
+	if target_fdr is not None and not (is_number(target_fdr) and 0 < target_fdr <= 1):
+		raise ValueError(f'target_fdr must be in (0, 1], but got {target_fdr!r}.')
+
+def validate_scores(scores, shape, name):
+	scores = np.asarray(scores, dtype=np.float64)
+	if scores.shape != shape:
+		raise ValueError(f'{name} returned an array of shape {scores.shape}; expected {shape}.')
+	if not np.all(np.isfinite(scores)):
+		raise ValueError(f'{name} returned non-finite values.')
+	return scores

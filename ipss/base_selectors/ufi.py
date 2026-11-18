@@ -9,13 +9,20 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.utils import check_random_state
 
+# the in-bag counts below assume the default bootstrap sampling of every training sample
+def check_rf_args(rf_args):
+	if rf_args.get('bootstrap', True) is not True or rf_args.get('max_samples') is not None:
+		raise ValueError("The 'ufi' selector requires bootstrap=True and max_samples=None.")
+
 def fit_ufi_classifier(X, y, **rf_args):
+	check_rf_args(rf_args)
 	model = RandomForestClassifier(**rf_args)
 	model.fit(X, y)
 	feature_importances = _cls(model, X, y)
 	return feature_importances
 
 def fit_ufi_regressor(X, y, **rf_args):
+	check_rf_args(rf_args)
 	model = RandomForestRegressor(**rf_args)
 	model.fit(X, y)
 	feature_importances = _regr(model, X, y)

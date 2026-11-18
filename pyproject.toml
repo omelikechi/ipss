@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ipss"
-version = "1.2.0"
+version = "2.0.0"
 description = "Python implementation of integrated path stability selection (IPSS)"
 readme = "README.md"
 license = "MIT"
@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 authors = [
 	{ name = "Omar Melikechi", email = "omar.melikechi@gmail.com" }
 ]
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 dependencies = [
 	"joblib",
 	"numpy",

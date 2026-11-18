@@ -14,3 +14,4 @@ dist/
 
 # Work in progress / experimental
 dev/
+.Rhistory
