@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.utils import check_random_state
 
 from .base_selectors import adaptive_weights
-from .helpers import (categorical_columns, check_response_type, compute_alphas, compute_qvalues, default_delta,
+from .helpers import (categorical_columns, check_response_type, compute_alphas, compute_delta, compute_qvalues,
 	efp_bound_integrand, integrate, ipss_function_order, is_integer, is_number, jitter_columns, resolve_preselector,
 	resolve_selector, score_based_selection, selector_and_args, validate_targets)
 from .preselection import preselection
@@ -138,9 +138,9 @@ def preprocess_ipss(X, y, selector, selector_args, preselect, preselector, prese
 	if ipss_function is None:
 		ipss_function = 'h2' if selector in ['lasso', 'logistic_regression'] else 'h3'
 
-	# probability measure
+	# probability measure: set from the feature correlations for the l1 selectors (see compute_delta)
 	if delta is None:
-		delta = default_delta
+		delta = compute_delta(X, selector)
 
 	# standardize and center data (by default only for l1 selectors); never center a binary response
 	if standardize_X is None:

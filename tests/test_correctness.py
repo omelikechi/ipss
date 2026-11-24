@@ -4,10 +4,11 @@ import unittest
 import warnings
 
 import numpy as np
+from scipy.sparse import csr_matrix
 
 from ipss import ipss
-from ipss.helpers import (categorical_columns, compute_qvalues, efp_bound_integrand, integrate, ipss_function_order,
-	jitter_columns, selector_and_args, stratified_halves)
+from ipss.helpers import (categorical_columns, compute_delta, compute_qvalues, correlation_summary, efp_bound_integrand,
+	integrate, ipss_function_order, jitter_columns, selector_and_args, stratified_halves)
 from ipss.preselection import preselection
 from ipss.processing import postprocess_ipss, preprocess_ipss
 
@@ -427,9 +428,52 @@ class DeltaAndSelectorTests(unittest.TestCase):
 		args.update(kwargs)
 		return preprocess_ipss(self.X, self.y, **args, random_state=0)
 
-	def test_default_delta_is_one(self):
-		for selector in ('gb', 'l1', 'rf'):
+	def test_default_delta(self):
+		# 1 for importance selectors; set from the feature correlations for l1
+		for selector in ('gb', 'rf', 'adaptive_lasso'):
 			self.assertEqual(self.prep(selector=selector)['delta'], 1)
+		self.assertEqual(self.prep(selector='l1')['delta'], compute_delta(self.X, 'lasso'))
+		self.assertEqual(self.prep(selector='l1', delta=1.5)['delta'], 1.5)
+
+	def test_compute_delta_matches_ipss_1_1_10(self):
+		# reference: the 1.1.10 rule, written with np.corrcoef and the linear system it solved
+		def reference(X):
+			cor = np.abs(np.corrcoef(X, rowvar=False))
+			np.fill_diagonal(cor, 0)
+			avg_cor, avg_max = np.mean(cor), np.mean(np.max(cor, axis=1))
+			if avg_cor <= 1 / 20:
+				return 1
+			if avg_cor >= 1 / 4:
+				return 0
+			coefs = np.linalg.inv(np.array([[1, 1 / 20, 1 / 2], [1, 1 / 4, 1 / 2], [1, 1 / 20, 1]])) @ np.array([1, 0, 0])
+			return max(0, min(1, coefs @ np.array([1, avg_cor, avg_max])))
+		rng = np.random.default_rng(0)
+		idx = np.arange(40)
+		for rho in (0, 0.5, 0.7, 0.8, 0.95):
+			chol = np.linalg.cholesky(rho ** np.abs(idx[:, None] - idx[None, :]))
+			X = rng.normal(size=(300, 40)) @ chol.T
+			for selector in ('lasso', 'logistic_regression'):
+				self.assertAlmostEqual(compute_delta(X, selector), reference(X), places=10)
+			self.assertEqual(compute_delta(X, 'rf_regressor'), 1)
+		# strong correlation lowers delta; independent features with large n keep delta = 1
+		X = rng.normal(size=(2000, 40))
+		self.assertEqual(compute_delta(X, 'lasso'), 1)
+		X = rng.normal(size=(300, 40)) @ np.linalg.cholesky(0.8 ** np.abs(idx[:, None] - idx[None, :])).T
+		self.assertLess(compute_delta(X, 'lasso'), 0.5)
+
+	def test_correlation_summary_blocks_sparse_and_constants(self):
+		rng = np.random.default_rng(1)
+		X = rng.normal(size=(50, 13)) * (rng.random((50, 13)) < 0.3)
+		X[:, 4] = 2.0
+		full = correlation_summary(X)
+		self.assertTrue(np.all(np.isfinite(full)))
+		for block_size in (1, 3, 13):
+			np.testing.assert_allclose(correlation_summary(X, block_size), full, rtol=1e-12)
+		np.testing.assert_allclose(correlation_summary(csr_matrix(X)), full, rtol=1e-9)
+		X_copy = X.copy()
+		correlation_summary(X)
+		np.testing.assert_array_equal(X, X_copy)
+		self.assertEqual(compute_delta(np.ones((10, 3)), 'lasso'), 1)
 
 	def test_delta_forms(self):
 		self.assertEqual(self.prep(delta=np.float64(2))['delta'], 2)

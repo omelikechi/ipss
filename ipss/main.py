@@ -45,7 +45,8 @@ Inputs:
 		(see function called preselection)
 	preselector_args: arguments for the preselection algorithm (see function called preselection)
 	cutoff: max value of theoretical integral bound I(Lambda)
-	delta: determines probability measure mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda (default 1)
+	delta: determines probability measure mu_delta(dlambda) = z_delta^{-1}lambda^{-delta}dlambda (default None, which sets
+		delta from the feature correlations for 'l1' and uses 1 for every other selector; see compute_delta in helpers)
 	subsample_size: size of each of the two disjoint subsamples (positive integer; default n // 2, and larger
 		values are reduced to n // 2)
 	stratify: for a binary response, draw each subsample with the same class proportions as y. This changes the

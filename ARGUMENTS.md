@@ -39,7 +39,7 @@
 	- `'h3'`: Cubic function, ```h3(x) = (2x - 1)**3 if x >= 0.5 else 0```.
 	- `'h4'`, `'h5'`, ...: Higher orders, ```hm(x) = (2x - 1)**m if x >= 0.5 else 0```. More aggressive than `'h3'`.
 - `cutoff`: Maximum value of the theoretical integral bound `I(Lambda)` (positive float; default `0.05`).
-- `delta`: Defines probability measure; see `Associated papers` (float; default `1`).
+- `delta`: Defines probability measure; see `Associated papers` (float; default `None`). For `'l1'`, `None` sets `delta` from the correlations between features: `1` if the average absolute correlation is at most `0.05`, `0` if it is at least `0.25`, and otherwise `2.25 - 5 * average - 2 * average maximum` absolute correlation, clipped to `[0, 1]`. Strongly correlated features need a smaller `delta` to control the FDR. Every other `selector` uses `1`.
 - `standardize_X`: Scale features to have mean 0, standard deviation 1 (bool; default `None`, which standardizes for `'l1'` and `'adaptive_lasso'` only).
 - `center_y`: Center response to have mean 0 (bool; default `None`, which centers for `'l1'` and `'adaptive_lasso'` only). Binary responses are never centered.
 - `subsample_size`: Size of each of the two disjoint subsamples (int; default `n // 2`).

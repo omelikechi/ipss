@@ -4,6 +4,7 @@ import re
 import warnings
 
 import numpy as np
+from scipy.sparse import issparse
 from sklearn.linear_model import Lasso, LogisticRegression
 
 from .base_selectors import *
@@ -184,8 +185,53 @@ def efp_bound_integrand(average_selected, p, B, m):
 		bound += stirling[m][k] * falling * r ** (2 * k) / B ** (m - k)
 	return p * bound
 
-# default delta for every selector: with the corrected scoring, results vary little with delta (checked over 0 to 3)
+# default delta for every selector except the l1 selectors, whose delta is set from the data (see compute_delta)
 default_delta = 1
+
+# delta for the l1 selectors ('lasso' and 'logistic_regression'), set from the feature correlations as in ipss 1.1.10:
+# 1 if the average absolute correlation is at most 1/20, 0 if it is at least 1/4, and otherwise
+# 2.25 - 5 * average - 2 * average maximum, clipped to [0, 1]. With strongly correlated features, delta = 1 can exceed
+# the target FDR (e.g., Toeplitz covariance 0.8^|j-k|); the smaller delta restores control. Every other selector uses
+# default_delta
+def compute_delta(X, selector):
+	if selector not in ('lasso', 'logistic_regression'):
+		return default_delta
+	avg_cor, avg_max = correlation_summary(X)
+	if avg_cor <= 1 / 20:
+		return 1
+	if avg_cor >= 1 / 4:
+		return 0
+	return float(np.clip(2.25 - 5 * avg_cor - 2 * avg_max, 0, 1))
+
+# average absolute correlation between features (over all p^2 pairs, with the diagonal counted as zero, as in ipss
+# 1.1.10) and average over features of the maximum absolute correlation with another feature. Constant features have
+# zero correlation with every feature. Columns are processed in blocks, so memory is O(n p + block_size * p)
+def correlation_summary(X, block_size=None):
+	n, p = X.shape
+	if issparse(X):
+		X = X.tocsc()
+		mean = np.asarray(X.mean(axis=0)).ravel()
+		second_moment = np.asarray(X.multiply(X).mean(axis=0)).ravel()
+		std = np.sqrt(np.maximum(second_moment - mean ** 2, 0))
+	else:
+		X = X - X.mean(axis=0)
+		std = X.std(axis=0)
+	scale = np.divide(1, std, out=np.zeros(p), where=std > 0)
+	block_size = block_size or max(1, 2 ** 22 // p)
+	total, max_cor = 0.0, np.zeros(p)
+	# errstate silences spurious matmul warnings from Apple's Accelerate BLAS
+	with np.errstate(all='ignore'):
+		for start in range(0, p, block_size):
+			stop = min(start + block_size, p)
+			if issparse(X):
+				cov = (X[:, start:stop].T @ X).toarray() / n - np.outer(mean[start:stop], mean)
+			else:
+				cov = X[:, start:stop].T @ X / n
+			cor = np.minimum(np.abs(cov * np.outer(scale[start:stop], scale)), 1)
+			cor[np.arange(stop - start), np.arange(start, stop)] = 0
+			total += cor.sum()
+			max_cor[start:stop] = cor.max(axis=1)
+	return total / p ** 2, max_cor.mean()
 
 # q-value of each feature: q(j) = min over t >= efp(j) of t / #{k : efp(k) <= t}
 def compute_qvalues(efp_scores):
